@@ -1,1 +1,28 @@
+# Core dependencies for Human-Robot Cooperation Simulation
+# Python 3.11+ required
 
+# Numerical computing
+numpy>=1.24.0,<2.0.0
+scipy>=1.10.0,<2.0.0
+
+# Data manipulation
+pandas>=1.5.0,<3.0.0
+
+# Network analysis
+networkx>=3.0,<4.0.0
+
+# Visualization
+matplotlib>=3.6.0,<4.0.0
+seaborn>=0.12.0,<1.0.0
+
+# Jupyter notebook support
+jupyter>=1.0.0
+ipywidgets>=8.0.0
+
+# Testing (optional, for development)
+pytest>=7.2.0
+pytest-cov>=4.0.0
+
+# Code quality (optional, for development)
+black>=23.0.0
+flake8>=6.0.0
