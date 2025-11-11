@@ -1,31 +1,25 @@
 # Behavioral Dynamics of Creative Cooperation in Human-3C-Bot Communities
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![DOI](https://img.shields.io/badge/DOI-pending-orange.svg)](https://github.com/a-nsilva/3c-bot)
 
 This repository contains the complete implementation of the agent-based simulation described in our paper:
 
-> **Silva, A.N., Nikghadam-Hojjati, S., Barata, J., & Estrada, L. (2025).**  
+> **Silva, Alexandre do Nascimento, Nikghadam-Hojjati, Sanaz, Barata, José, & Estrada, Luiz (2025).**  
 > *"Behavioral dynamics of creative cooperation in human-3C-bot communities: an agent-based simulation of trust-mediated innovation."*  
-> [Journal Name] [Under Review]
+> [IEEE Access] [Under Review]
 
-## 🎯 Overview
+## 🎯 Theoretical Foundation
 
 This computational model simulates trust-mediated creative cooperation in mixed human-robot organizational communities. It integrates four theoretical frameworks:
 
-- **Social Value Orientation** (Van Lange, 1999; Balliet et al., 2009)
-- **Asimov's Three Laws of Robotics** (Anderson & Anderson, 2007)
 - **Guilford's Creativity Model** (1967)
+- **Asimov's Three Laws of Robotics** (Anderson & Anderson, 2007)
+- **Social Value Orientation** (Van Lange, 1999; Balliet et al., 2009)
 - **Trust in Automation Theory** (Lee & See, 2004; Hancock et al., 2011)
 
 ## 🚀 Quick Start
-
-### System Requirements
-- **Python**: 3.11.0 or higher
-- **RAM**: 8GB minimum
-- **Disk Space**: ~500MB for results
-- **OS**: Windows, macOS, or Linux
 
 ### Installation
 
@@ -58,106 +52,26 @@ python -c "import numpy, scipy, networkx, matplotlib; print('✅ All dependencie
 
 ### Running the Simulation
 
-The simulation is implemented as a self-contained Jupyter notebook for ease of understanding and replication.
+The simulation is implemented as Command Line Interface.
 ```bash
-# Launch Jupyter
-jupyter notebook
-
-# Open: human_robot_simulation.ipynb
-# Execute cells sequentially (Cell → Run All)
-```
-
-**Expected runtime**: ~30 minutes for full experiment (50 simulations)
+python -m main
 
 **Expected output**:
-- Statistical results (JSON format) in `results/data/`
-- Visualization plots (PNG format) in `results/figures/`
-
-## 📊 Reproducing Paper Results
-
-The notebook reproduces all results from the manuscript:
-
-| Configuration | Mean Trust | 95% CI | Symbiosis Rate |
-|--------------|------------|--------|----------------|
-| Human Majority (83%H/17%R) | 0.621 | [0.612, 0.631] | 0% |
-| Human Lean (67%H/33%R) | 0.660 | [0.650, 0.670] | 0% |
-| Balanced (50%H/50%R) | 0.670 | [0.658, 0.681] | 0% |
-| Robot Lean (33%H/67%R) | 0.674 | [0.668, 0.681] | 0% |
-| **Robot Majority (17%H/83%R)** | **0.692** | **[0.680, 0.703]** | **20%** |
-
-**Statistical Analysis**: F(4,45) = 35.00, p < 0.001, η² = 0.757 (large effect size)
-
-### Quick Validation
-
-To verify correct installation, run the **demo mode** (completes in ~5 minutes):
-
-1. Open the notebook
-2. Locate the `main()` function
-3. Select option `1. 🚀 Quick demo (validation)`
-
-The demo should produce:
-- Final trust: ~0.670
-- Convergence cycle: ~50
-- 12 diagnostic plots
-
-## 📖 Documentation
-
-### Theoretical Framework
-See [`docs/theoretical_framework.md`](docs/theoretical_framework.md) for detailed explanation of:
-- Social Value Orientation (SVO) theory
-- Asimov's Three Laws implementation
-- Guilford's four-factor creativity model
-- Trust-mediated innovation mechanisms
-
-### Parameter Justification
-See [`docs/parameter_justification.md`](docs/parameter_justification.md) for literature-based justification of all simulation parameters:
-- Cooperation tendencies (0.80-0.95 for altruistic, etc.)
-- Trust thresholds (0.70 for innovation symbiosis)
-- Creative capability distributions (Beta distributions)
-- Activity weights (0.8 for creative collaboration, etc.)
-
-### Replication Guide
-See [`docs/replication_guide.md`](docs/replication_guide.md) for step-by-step instructions, troubleshooting, and expected outputs.
-
-## 🔬 Methodology Highlights
-
-### Agent Types
-- **Human Agents**: 3 behavioral profiles (Altruistic, Egoistic, Vindictive) based on SVO theory
-- **Robot Agents**: Consistent behavior governed by Asimov's Three Laws
-
-### Population Configurations
-- 5 human-robot ratios tested (83%H/17%R to 17%H/83%R)
-- 60 agents per simulation
-- 10 replications per configuration (N=50 total simulations)
-
-### Key Metrics
-- **Trust Evolution**: Human-robot trust dynamics over 1000 cycles (~3 organizational years)
-- **ICC Score**: Cooperation-Creativity Index (composite metric)
-- **Innovation Symbiosis**: Binary achievement of trust threshold (≥0.70)
-- **Network Density**: Collaboration network properties
-
-### Statistical Validation
-- One-way ANOVA with effect size (η²)
-- 95% Confidence intervals
-- Shapiro-Wilk normality tests
-- Levene's homogeneity tests
-- Behavioral distribution validation (χ² goodness-of-fit)
+- Statistical results (JSON/CSV format) in `results/report/`
+- Visualization plots (PNG format) in `results/plot/`
 
 ## 📁 Repository Structure
 ```
 3c-bot/
 ├── README.md                          # This file
-├── LICENSE                            # GPL-3.0 license
-├── CITATION.cff                       # Structured citation metadata
+├── LICENSE                            # Apache 2.0 license
 ├── requirements.txt                   # Python dependencies
-├── human_robot_simulation.ipynb       # Complete simulation code
-├── docs/
-│   ├── theoretical_framework.md       # Detailed theory
-│   ├── parameter_justification.md     # Parameter sources
-│   └── replication_guide.md           # Step-by-step guide
-└── results/                           # Generated outputs (not in Git)
-    ├── data/                          # JSON results
-    └── figures/                       # PNG plots
+├── src/
+│   ├── core.py                        # Core simulation engine and classes
+│   └── main.py                        # Command-line interface
+└── results/                           
+    ├── report/                        # JSON and CSV results
+    └── plot/                          # PNG plots
 ```
 
 ## 🐛 Troubleshooting
@@ -185,28 +99,22 @@ If you use this code in your research, please cite:
 @article{silva2025creative,
   title={Behavioral dynamics of creative cooperation in human-3C-bot communities: an agent-based simulation of trust-mediated innovation},
   author={Silva, Alexandre do Nascimento and Nikghadam-Hojjati, Sanaz and Barata, Jos{\'e} and Estrada, Luiz},
-  journal={[Journal Name]},
+  journal={IEEE Access},
   year={2025},
   note={Under Review}
 }
 ```
 
-See [`CITATION.cff`](CITATION.cff) for machine-readable citation metadata.
-
 ## 📜 License
 
-This project is licensed under the **GNU General Public License v3.0** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **Apache** - see the [LICENSE](LICENSE) file for details.
 
-Key points:
-- ✅ Free to use, modify, and distribute
-- ✅ Must disclose source code
-- ✅ Must use same GPL-3.0 license for derivatives
-- ✅ No warranty provided
 
 ## 👥 Authors & Contact
 
 - **Alexandre do Nascimento Silva** (Corresponding Author)  
-  Universidade Estadual de Santa Cruz (UESC)  
+  Universidade Estadual de Santa Cruz (UESC), Departamento de Engenharias e Computação
+  Universidade do Estado da Bahia (UNEB), Programa de Pós-graduação em Modelagem e Simulação em Biossistemas (PPGMSB)
   📧 alnsilva@uesc.br
 
 - **Sanaz Nikghadam-Hojjati**  
@@ -221,15 +129,10 @@ Key points:
 ## 🙏 Acknowledgments
 
 This research was supported by:
+- Coordenação de Aperfeiçoamento de Pessoal de Nível Superior (CAPES)
 - Universidade Estadual de Santa Cruz (UESC)
+- Universidade do Estado da Bahia (UNEB)
 - Universidade Nova de Lisboa
-- [Add funding agencies if applicable]
-
-## 🔗 Related Resources
-
-- [Paper Preprint](https://arxiv.org/abs/XXXXX) (when available)
-- [Supplementary Materials](https://doi.org/XXXXX) (when available)
-- [Project Website](https://a-nsilva.github.io/3c-bot) (optional)
 
 ---
 
