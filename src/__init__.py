@@ -5,7 +5,7 @@ Computational Modeling of Behavioral Dynamics in Human-Robot Organizational Comm
 
 __version__ = "1.0.0"
 __author__ = "Alexandre do Nascimento Silva"
-__email__ = "your.email@example.com"
+__email__ = "alnsilva@uesc.br"
 
 from .core import (
     BehaviorProfile,
