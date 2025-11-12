@@ -27,6 +27,17 @@ class ResearchVisualizer:
       'vindictive': '#F18F01',
     }
 
+  def _configure_plot_defaults(self, ax, title: str, 
+                                 xlabel: str = 'Simulation Cycles',
+                                 ylabel: str = None):
+    """Apply standard formatting to plot"""
+    ax.set_title(title, fontsize=14, fontweight='bold')
+    ax.set_xlabel(xlabel, fontsize=12)
+    if ylabel:
+      ax.set_ylabel(ylabel, fontsize=12)
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc='best', fontsize=10)
+                                   
   def _plot_trust_evolution(self, ax, data_collector: DataCollector):
     """Plot 1: Trust evolution with symbiosis threshold"""
     trust_data = data_collector.raw_data['trust']
@@ -35,11 +46,8 @@ class ResearchVisualizer:
     ax.plot(cycles, trust_data, 'b-', linewidth = 3, alpha = 0.8, label = 'H-3C-Cobot trust')
     ax.axhline(y = 0.7, color = 'red', linestyle = '--', alpha = 0.7, label = 'Symbiosis threshold')
 
-    ax.set_title('Human-3C-Bot trust evolution')
-    ax.set_xlabel('Simulation cycles')
-    ax.set_ylabel('Trust level')
-    ax.legend()
-    ax.grid(True, alpha = 0.3)
+    self._configure_plot_defaults(ax, 'Human-3C-Bot trust evolution', 
+                                  ylabel = 'Trust level')
     ax.set_ylim(0, 1)
 
   def _plot_behavioral_profiles(self, ax, data_collector: DataCollector):
