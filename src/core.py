@@ -115,7 +115,7 @@ class Activity:
   participants: List[str] = field(default_factory=list)
   progress: float = 0.0
   quality: float = 0.0
-  _score: float = 0.0  # Our CCI (Cooperation-Creativity Index)
+  cci_score: float = 0.0  # Cooperation-Creativity Index
   completed: bool = False
   start_cycle: int = 0
 
