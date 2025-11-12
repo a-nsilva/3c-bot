@@ -1,4 +1,4 @@
-# Behavioral Dynamics of Creative Cooperation in Human-3C-Bot Communities
+# 3C-Bot Simulation: Human-Robot Creative Cooperation Dynamics
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
@@ -29,85 +29,64 @@ git clone https://github.com/a-nsilva/3c-bot.git
 cd 3c-bot
 ```
 
-2. **Create virtual environment** (recommended)
-```bash
-# Using venv
-python3.11 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# OR using conda
-conda create -n 3c-bot python=3.11
-conda activate 3c-bot
-```
-
-3. **Install dependencies**
+2. **Install dependencies**
 ```bash
 pip install -r requirements.txt
-```
-
-4. **Verify installation**
-```bash
-python -c "import numpy, scipy, networkx, matplotlib; print('✅ All dependencies installed successfully')"
 ```
 
 ### Running the Simulation
 
 The simulation is implemented as Command Line Interface.
 ```bash
-python -m main
+python -m src.main
+```
+## 📊 Features
 
-**Expected output**:
-- Statistical results (JSON/CSV format) in `results/report/`
-- Visualization plots (PNG format) in `results/plot/`
+- **Complete Experiments**: 5 population configurations × N replications
+- **Custom Simulations**: Flexible parameters
+- **Advanced Analysis**: 
+  - Sensitivity analysis
+  - Scalability validation
+  - Agent state evolution tracking
+- **Publication-Ready Visualizations**: 15+ scientific plots
 
+- **Expected output**:
+  - Statistical results (JSON/CSV format) in `results/report/`
+  - Visualization plots (PNG format) in `results/plot/`
+  
 ## 📁 Repository Structure
 ```
 3c-bot/
-├── README.md                          # This file
-├── LICENSE                            # Apache 2.0 license
-├── requirements.txt                   # Python dependencies
+├── README.md                       # This file
+├── LICENSE                         # Apache 2.0 license
+├── requirements.txt                # Python dependencies
 ├── src/
-│   ├── core.py                        # Core simulation engine and classes
-│   └── main.py                        # Command-line interface
+│   ├── core.py                     # Simulation engine
+│   ├── experiments.py              # Experiment runners
+│   ├── visualization.py            # Plotting system
+│   ├── analysis.py                 # Advanced analyses
+│   └── main.py                     # CLI interface
 └── results/                           
-    ├── report/                        # JSON and CSV results
-    └── plot/                          # PNG plots
+    ├── report/                     # JSON outputs
+    └── plot/                       # PNG figures
 ```
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Issue**: `ModuleNotFoundError: No module named 'numpy'`  
-**Solution**: Ensure you've activated the virtual environment and run `pip install -r requirements.txt`
-
-**Issue**: Notebook kernel crashes during simulation  
-**Solution**: Reduce population size or number of replications (see configuration section in notebook)
-
-**Issue**: Results differ slightly from paper  
-**Solution**: Ensure you're using Python 3.11+ and exact dependency versions from `requirements.txt`. Note: floating-point arithmetic may cause minor (<0.001) variations across platforms.
-
-**Issue**: Plots not displaying  
-**Solution**: If using Jupyter Lab, install widget extension: `jupyter labextension install @jupyter-widgets/jupyterlab-manager`
-
-For other issues, please open a [GitHub Issue](https://github.com/a-nsilva/3c-bot/issues).
 
 ## 📄 Citation
 
 If you use this code in your research, please cite:
 ```bibtex
 @article{silva2025creative,
-  title={Behavioral dynamics of creative cooperation in human-3C-bot communities: an agent-based simulation of trust-mediated innovation},
-  author={Silva, Alexandre do Nascimento and Nikghadam-Hojjati, Sanaz and Barata, Jos{\'e} and Estrada, Luiz},
-  journal={IEEE Access},
-  year={2025},
-  note={Under Review}
+  title = {Behavioral dynamics of creative cooperation in human-3C-bot communities: an agent-based simulation of trust-mediated innovation},
+  author = {Silva, Alexandre do Nascimento and Nikghadam-Hojjati, Sanaz and Barata, Jos{\'e} and Jimenez, Luiz Estrada},
+  journal = {IEEE Access},
+  year = {2025},
+  note = {Under Review}
 }
 ```
 
 ## 📜 License
 
-This project is licensed under the **Apache** - see the [LICENSE](LICENSE) file for details.
+MIT License - see LICENSE file for details.
 
 
 ## 👥 Authors & Contact
@@ -136,6 +115,5 @@ This research was supported by:
 
 ---
 
-**Last Updated**: January 2025  
-**Repository Status**: Under active development for publication  
-**Issues**: Please report bugs via [GitHub Issues](https://github.com/a-nsilva/3c-bot/issues)
+**Last Updated**: November 2025  
+**Repository Status**: Under active development for publication 
