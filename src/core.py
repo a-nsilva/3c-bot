@@ -16,10 +16,10 @@ Contact:
   alnsilva@uesc.br
 
 Theoretical Foundation:
-- Social Value Orientation (Van Lange, 1999; Balliet et al., 2009)
-- Asimov's Three Laws of Robotics (1950; Anderson & Anderson, 2007) 
-- Guilford's Structure of Intellect Model (1967)
-- Trust in Automation Theory (Lee & See, 2004; Hancock et al., 2011)
+  - Social Value Orientation (Van Lange, 1999; Balliet et al., 2009)
+  - Asimov's Three Laws of Robotics (1950; Anderson & Anderson, 2007) 
+  - Guilford's Structure of Intellect Model (1967)
+  - Trust in Automation Theory (Lee & See, 2004; Hancock et al., 2011)
 """
 
 # ========== IMPORTS ==========
@@ -292,6 +292,33 @@ class DataCollector:
     cci = (0.4 * cooperation_level + 0.4 * creativity_level + 0.2 * stability_level)
     return np.clip(cci, 0, 1)
 
+  @staticmethod
+  def calculate_descriptive_stats(values: List[float]) -> Dict:
+    """Calculate mean, std, CI95 for a list of values"""
+    if not values:
+      return {
+        'mean': 0.0, 'std': 0.0,
+        'ci_95_lower': 0.0, 'ci_95_upper': 0.0
+      }
+    
+    mean = np.mean(values)
+    std = np.std(values, ddof=1) if len(values) > 1 else 0.0
+    
+    if len(values) > 1:
+      ci_95 = stats.t.interval(
+        0.95, len(values)-1,
+        loc = mean, scale = stats.sem(values)
+      )
+    else:
+      ci_95 = (mean, mean)
+    
+    return {
+      'mean': float(mean),
+      'std': float(std),
+      'ci_95_lower': float(ci_95[0]),
+      'ci_95_upper': float(ci_95[1])
+    }
+      
   def validate_behavioral_distribution(self, humans: List[HumanAgent]) -> Dict:
     """Validate against empirical distribution (Balliet et al., 2009)"""
     if not humans:
