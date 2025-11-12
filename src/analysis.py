@@ -246,7 +246,7 @@ class AdvancedAnalysis:
         ci_95 = stats.t.interval(
           0.95,
           len(trust_values)-1,
-          loc=mean_trust,
+          loc = mean_trust,
           scale=stats.sem(trust_values)
         )
       else:
@@ -345,7 +345,7 @@ class AdvancedAnalysis:
         )
 
         config_trust_values.append(result['final_trust'])
-        print(f" Trust={result['final_trust']:.3f}")
+        print(f" Trust = {result['final_trust']:.3f}")
 
       mean_config_trust = np.mean(config_trust_values)
       std_config_trust = np.std(config_trust_values, ddof=1) if len(config_trust_values) > 1 else 0
@@ -407,8 +407,8 @@ class AdvancedAnalysis:
     # PHASE 5: Save Results
     # ===================================================================
     self.save_research_results(
-        scalability_summary,
-        filename = "scalability_validation_results.json"
+      scalability_summary,
+      filename = "scalability_validation_results.json"
     )
 
     # ===================================================================
