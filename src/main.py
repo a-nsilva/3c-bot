@@ -1,132 +1,137 @@
-#!/usr/bin/env python3
 """
-3C-BOT Research Simulator - CLI Interface
-Command line interface for the human-robot organizational dynamics simulator
+MAIN INTERFACE
+Command-line interface for research experiments
 """
 
-import sys
-import os
+from .core import ConfigurationType, ExperimentScale
+from .experiments import ResearchExperiment
 
-# Add the parent directory to path for imports
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+def print_header():
+  print("\n" + "="*70)
+  print("🧬 HUMAN-3C-BOT ORGANIZATIONAL DYNAMICS SIMULATOR v1.0")
+  print("="*70)
+  print("Theoretical: SVO, Asimov Laws, Guilford, Trust Theory")
+  print("="*70)
 
-from core import ConfigurationType, ExperimentScale, ResearchExperiment
+def main_menu():
+  print("\n🎯 RESEARCH OPTIONS:")
+  print("1. 🚀 Quick Demo (validation)")
+  print("2. 🔬 Complete Experiment (5 configs × N reps)")
+  print("3. 🎯 Custom Experiment")
+  print("4. 🔍 Advanced Analysis")
+  print("5. ❌ Exit")
 
+  return input("\nSelect option (1-5): ").strip()
 
-def display_menu():
-    """Display the main menu"""
-    print("\n" + "="*70)
-    print("🧬 3C-BOT RESEARCH SIMULATOR v1.0")
-    print("Theoretical Foundation: SVO, Asimov Laws, Guilford Model, Trust Theory")
-    print("="*70)
-    print("\n1. 🚀 Quick demo")
-    print("2. 🔬 Complete experiment (all configurations)")
-    print("3. 🎯 Custom experiment")
-    print("4. ❌ Exit")
-    print("\n" + "="*70)
-
-def run_complete_experiment():
-    """Run demonstration experiment with defined parameters"""
-    print("\n🎯 DEMO EXPERIMENT")
+def advanced_analysis_menu():
+  print("\n🔍 ADVANCED ANALYSIS:")
+  print("4.1 📊 Sensitivity Analysis")
+  print("4.2 📈 Scalability Validation")
+  print("4.3 🎨 Generate Figure 4 (Agent States)")
+  print("4.4 ← Back to Main Menu")
     
-    experiment = ResearchExperiment()
-    results = experiment.run_custom_experiment()
-    
-    if results:
-        print(f"\n✅ DEMO experiment completed!")
-        print(f"Final trust: {results['final_trust']:.3f}")
-        print(f"Symbiosis achieved: {'✅ Yes' if results['achieved_symbiosis'] else '❌ No'}")
-    
-    return results
-    
-def run_complete_experiment():
-    """Run complete research experiment with all configurations"""
-    print("This will test all 5 population configurations with statistical analysis.")
-    print("\nSelect experimental scale:")
-    scales = list(ExperimentScale)
-    for i, scale in enumerate(scales, 1):
-        population, replications = scale.value
-        expected_time = population * replications * 0.015  # Estimated time
-        print(f"{i}. {scale.name} ({population} agents, {replications} replications) [~{expected_time:.1f}s]")
-    try:
-        choice = int(input("\nChoose scale (1-3): ")) - 1
-        if 0 <= choice < len(scales):
-            scale = scales[choice]
-            
-            cycles = input("Cycles per simulation (default 1000): ").strip()
-            cycles = int(cycles) if cycles else 1000
-            
-            print(f"\nStarting complete experiment...")
-            print(f"Scale: {scale.name}")
-            print(f"Cycles: {cycles}")
-            print("This may take several minutes...")
-            
-            experiment = ResearchExperiment()
-            results = experiment.run_complete_experiment(scale = scale, cycles = cycles)
-            
-            print(f"\n✅ Experiment completed!")
-            print(f"Best configuration: {results['best_config']}")
-            print(f"Results saved to: results/report/")
-            
-            return results
-        else:
-            print("❌ Invalid scale selection")
-            return None
-    except (ValueError, KeyboardInterrupt):
-        print("\n❌ Operation cancelled")
-        return None
-
-def run_custom_experiment():
-    """Run custom experiment with user-defined parameters"""
-    print("\n🎯 CUSTOM EXPERIMENT")
-    print("Configure your own experiment parameters:")
-    
-    experiment = ResearchExperiment()
-    results = experiment.run_custom_experiment()
-    
-    if results:
-        print(f"\n✅ Custom experiment completed!")
-        print(f"Final trust: {results['final_trust']:.3f}")
-        print(f"Symbiosis achieved: {'✅ Yes' if results['achieved_symbiosis'] else '❌ No'}")
-    
-    return results
-
+  return input("\nSelect option (4.1-4.4): ").strip()
 
 def main():
-    """Main CLI interface"""
+  print_header()
+  runner = ResearchExperiment()
+    
+  while True:
     try:
-        while True:
-            display_menu()
-            choice = input("\nSelect option (1-3): ").strip()
+      choice = main_menu()
+        
+        if choice == "1":
+          # Quick Demo
+          result = runner.run_demo_experiment()
             
-            if choice == "2":
-                run_demo_experiment()
+        elif choice == "2":
+          # Complete Experiment
+          print("\n📊 Select scale:")
+          scales = list(ExperimentScale)
+          for i, s in enumerate(scales, 1):
+            pop, reps = s.value
+            print(f"{i}. {s.name} ({pop} agents, {reps} reps)")
+            
+          scale_idx = int(input("Choice (1-3): ")) - 1
+          if 0 <= scale_idx < len(scales):
+            scale = scales[scale_idx]
+            results = runner.run_complete_experiment(scale=scale)
+            runner.generate_research_visualizations(experiment_results=results)
+            runner.save_research_results(results)
                 
-            if choice == "2":
-                run_complete_experiment()
+        elif choice == "3":
+          # Custom Experiment
+          print("\n🎯 CUSTOM CONFIGURATION:")
+            
+          # Scale
+          print("\nScale:")
+          scales = list(ExperimentScale)
+          for i, s in enumerate(scales, 1):
+            print(f"{i}. {s.name} ({s.value[0]} agents)")
+          scale = scales[int(input("Choice (1-3): ")) - 1]
+            
+          # Configuration
+          print("\nPopulation:")
+          configs = list(ConfigurationType)
+          for i, c in enumerate(configs, 1):
+            h, r = c.value
+            print(f"{i}. {int(h*100)}%H/{int(r*100)}%R")
+          config = configs[int(input("Choice (1-5): ")) - 1]
+            
+          # Cycles
+          cycles = int(input("\nCycles (default 1000): ") or "1000")
+            
+          print(f"\n🔬 Running: {config.name}, {scale.name}, {cycles} cycles")
+          result = runner.run_single_experiment(config, scale, cycles)
+          runner.generate_research_visualizations(single_result=result)
+            
+        elif choice == "4":
+          # Advanced Analysis submenu
+          sub_choice = advanced_analysis_menu()
+            
+          if sub_choice == "4.1":
+            print("\n📊 Running Sensitivity Analysis...")
+            results = runner.advanced_analysis.run_sensitivity_analysis()
+            print("✅ Complete! Saved to sensitivity_analysis_results.json")
                 
-            elif choice == "3":
-                run_custom_experiment()
+          elif sub_choice == "4.2":
+            print("\n📈 Running Scalability Validation...")
+            results = runner.advanced_analysis.validate_population_scalability()
+            print("✅ Complete! Saved to scalability_validation_results.json")
                 
-            elif choice == "4":
-                print("\nThank you for using the 3C-BOT Research Simulator!")
-                print("\nFor academic citation:")
-                print("Silva, A. N. et al. Computational modeling of behavioral dynamics")
-                print("in human-robot organizational communities.")
-                break
+          elif sub_choice == "4.3":
+            print("\n🎨 Generating Figure 4...")
+            result = runner.run_single_experiment(
+              ConfigurationType.MAJORITY_ROBOT,
+              ExperimentScale.MEDIUM,
+              cycles = 1000,
+              seed = 42
+            )
+            runner.visualizer.create_agent_states_heatmap(
+              result['data_collector'],
+              result['agents'],
+              "figure4"
+            )
+            print("✅ Saved: figure4_agent_states_heatmap.png")
                 
-            else:
-                print("❌ Invalid option. Please choose 1, 2, or 3.")
+          elif sub_choice == "4.4":
+            continue  # Volta ao menu principal
                 
-            input("\nPress Enter to continue...")
+        elif choice == "5":
+          print("\n👋 Thank you!")
+          print("Citation: Silva, A.N. et al. (2025)")
+          break
+            
+        else:
+          print("❌ Invalid option")
             
     except KeyboardInterrupt:
-        print("\n\n⏹️ Operation interrupted by user")
+      print("\n\n⏹️ Interrupted by user")
+      break
     except Exception as e:
-        print(f"\n❌ Error: {e}")
-        import traceback
-        traceback.print_exc()
-
+      print(f"\n❌ Error: {e}")
+      import traceback
+      traceback.print_exc()
 
 if __name__ == "__main__":
-    main()
+  main()
