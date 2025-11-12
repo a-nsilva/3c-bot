@@ -4,53 +4,19 @@ __pycache__/
 *$py.class
 *.so
 .Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-pip-wheel-metadata/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# Virtual environments
-venv/
 env/
-ENV/
+venv/
+*.egg-info/
 
-# IDE
+# Results (opcional - comentar se quiser versionar)
+results/reports/*.json
+results/plots/*.png
+
+# IDEs
 .vscode/
 .idea/
 *.swp
-*.swo
-
-# Jupyter
-.ipynb_checkpoints/
-
-# Results and plots (optional - you might want to keep some)
-results/plots/*
-!results/plots/.gitkeep
-results/reports/*
-!results/reports/.gitkeep
 
 # OS
 .DS_Store
 Thumbs.db
-
-# Logs
-*.log
-logs/
-
-# Temporary files
-*.tmp
-*.temp
