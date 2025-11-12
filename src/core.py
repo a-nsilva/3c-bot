@@ -23,13 +23,9 @@ Theoretical Foundation:
 """
 
 # ========== IMPORTS ==========
+# === Standard library imports ===
 import json
-import matplotlib.pyplot as plt
-import networkx as nx
-import numpy as np
-import pandas as pd
 import random
-import seaborn as sns
 import time
 import warnings
 from collections import defaultdict, deque
@@ -37,8 +33,15 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from scipy import stats
 from typing import Any, Dict, List, Optional, Tuple, Union
+
+# === Third-party imports ===
+import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from scipy import stats
 
 # ========== CONFIGURATIONS ==========
 warnings.filterwarnings('ignore')
