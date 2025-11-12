@@ -34,6 +34,53 @@ class ResearchExperiment:
     self.visualizer = ResearchVisualizer()
     self.advanced_analysis = AdvancedAnalysis(self.results_dir)
 
+
+  def _calculate_population(self, config_type: ConfigurationType, 
+                             scale: ExperimentScale) -> Tuple[int, int]:
+    """Calculate number of humans and robots for given configuration"""
+    population, _ = scale.value
+    humans_ratio, robots_ratio = config_type.value
+    num_humans = round(population * humans_ratio)
+    num_robots = population - num_humans
+    return num_humans, num_robots
+
+  def _make_json_safe(self, obj):
+    """Convert objects to JSON-serializable format recursively"""
+    if isinstance(obj, dict):
+      return {k: self._make_json_safe(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+      return [self._make_json_safe(item) for item in obj]
+    elif isinstance(obj, (bool, np.bool_)):
+      return bool(obj)
+    elif isinstance(obj, (int, np.integer)):
+      return int(obj)
+    elif isinstance(obj, (float, np.floating)):
+      return float(obj)
+    elif obj is None:
+      return None
+    elif hasattr(obj, 'name'):  # Enum
+      return obj.name
+    else:
+        return str(obj)
+    
+  def _log_file_saved(self, filepath: Path, file_type: str = "Results"):
+    """Print standardized file saved message"""
+    print(f"💾 {file_type} saved: {filepath}")
+    print(f"   File size: {filepath.stat().st_size / 1024:.1f} KB")
+    
+  def _print_results_summary(self, results: Dict, title: str = "RESULTS"):
+    """Print standardized results summary"""
+    print(f"\n🏆 {title}:")
+    
+    if 'mean_trust' in results:
+        print(f"   Mean trust: {results['mean_trust']:.3f} ± {results.get('std_trust', 0):.3f}")
+    
+    if 'ci_95_lower' in results:
+        print(f"   95% CI: [{results['ci_95_lower']:.3f}, {results['ci_95_upper']:.3f}]")
+    
+    if 'symbiosis_rate' in results:
+        print(f"   Symbiosis rate: {results['symbiosis_rate']:.1%}")
+          
   def _perform_anova(self, all_trust_values: Dict[str, List[float]]) -> Dict:
     """Perform ANOVA with real simulation data"""
     groups = list(all_trust_values.values())
@@ -41,7 +88,7 @@ class ResearchExperiment:
     if len(groups) < 2:
       return {'error': 'Insufficient groups for ANOVA'}
 
-    try:#reviewer
+    try:
       # 1. Test normality (Shapiro-Wilk) report
       normality_results = {}
       all_normal = True
