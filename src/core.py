@@ -51,24 +51,28 @@ random.seed(42)
 # ========== ENUMS ==========
 class BehaviorProfile(Enum):
   """Social Value Orientation profiles (Van Lange, 1999; Balliet et al., 2009)"""
+  
   ALTRUISTIC = "altruistic"   # Prosocial: ~60% population
   EGOISTIC = "egoistic"       # Individualistic: ~25% population
   VINDICTIVE = "vindictive"   # Competitive: ~15% population
 
 class ActivityType(Enum):
   """Organizational activity types with creativity weights"""
+  
   CREATIVE_COLLABORATION = "creative_collaboration"  # Weight: 0.8
   KNOWLEDGE_EXCHANGE = "knowledge_exchange"          # Weight: 0.3
   ADAPTIVE_RESOLUTION = "adaptive_resolution"        # Weight: 0.5
 
 class ExperimentScale(Enum):
   """Experimental scales for cross-validation"""
+  
   SMALL = (30, 5)     # (population, replications)
   MEDIUM = (60, 10)   # Recommended for papers
   LARGE = (90, 15)    # For robust analyses
 
 class ConfigurationType(Enum):
   """Human-robot population ratios"""
+  
   MAJORITY_HUMAN = (0.83, 0.17)    # 83%H / 17%R
   HUMAN_LEAN = (0.67, 0.33)        # 67%H / 33%R
   BALANCED = (0.50, 0.50)          # 50%H / 50%R
@@ -79,6 +83,7 @@ class ConfigurationType(Enum):
 @dataclass
 class CreativeCapabilities:
   """Guilford's Structure of Intellect Model (1967)"""
+  
   fluency: float = 0.5      # Idea generation rate
   flexibility: float = 0.5   # Conceptual shifting ability
   originality: float = 0.5   # Novel solution generation
@@ -90,6 +95,7 @@ class CreativeCapabilities:
 @dataclass
 class TheoreticalParameters:
   """Empirically-grounded parameters from literature"""
+  
   # Social Value Orientation (Van Lange, 1999; Fehr & Fischbacher, 2003)
   ALTRUISTIC_COOPERATION = (0.80, 0.95)
   EGOISTIC_COOPERATION = (0.15, 0.35)
@@ -107,6 +113,7 @@ class TheoreticalParameters:
 @dataclass
 class Activity:
   """Organizational activity with scientific metrics"""
+  
   id: str
   type: ActivityType
   duration: int
@@ -122,6 +129,7 @@ class Activity:
 # ========== AGENT CLASSES ==========
 class Agent:
   """Base agent class with theoretical grounding"""
+  
   def __init__(self, agent_id: str, agent_type: str):
     self.id: str = agent_id #reviewer
     self.type: str = agent_type #reviewer
@@ -167,6 +175,7 @@ class Agent:
 
 class HumanAgent(Agent):
   """Human agent with SVO-based behavior"""
+  
   def __init__(self, agent_id: str, behavior_profile: BehaviorProfile):
     super().__init__(agent_id, "human")
     self.behavior_profile = behavior_profile
@@ -225,6 +234,7 @@ class HumanAgent(Agent):
 
 class RobotAgent(Agent):
   """Robot agent following Asimov's Three Laws"""
+  
   def __init__(self, agent_id: str):
     super().__init__(agent_id, "robot")
     self.processing_power = np.random.uniform(0.7, 1.0)
@@ -461,7 +471,6 @@ class DataCollector:
     self.raw_data['cci_score'].append(avg_cci)
     self.raw_data['network_density'].append(network_density)
 
-    #reviewer
     # Collect individual agent states for temporal analysis
     for agent in agents:
       # Initialize structure if this is the first time viewing this agent
@@ -524,6 +533,7 @@ class DataCollector:
 # ========== SIMULATION ENGINE ==========
 class CoreEngine:
   """Core simulation engine with clean architecture"""
+  
   def __init__(self, num_humans: int, num_robots: int, config_type: ConfigurationType):
     self.agents: List[Agent] = []
     self.activities: List[Activity] = []
