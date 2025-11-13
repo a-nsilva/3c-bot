@@ -86,9 +86,7 @@ class AdvancedAnalysis:
 
     sensitivity_results = {}
 
-    # ===================================================================
     # 1. TEST TRUST LEARNING RATE (α)
-    # ===================================================================
     print("\n📊 Testing Trust Learning Rate (α) sensitivity...")
     alpha_values = [0.05, 0.10, 0.15]
     alpha_results = []
@@ -116,7 +114,7 @@ class AdvancedAnalysis:
 
     TheoreticalParameters.TRUST_LEARNING_RATE = original_learning_rate
 
-    # Calcular Coefficient of Variation
+    # Calculate Coefficient of Variation
     trust_values = [r['final_trust'] for r in alpha_results]
     mean_trust = np.mean(trust_values)
     std_trust = np.std(trust_values, ddof = 1) if len(trust_values) > 1 else 0
@@ -127,14 +125,12 @@ class AdvancedAnalysis:
       'cv': cv_alpha,
       'mean': mean_trust,
       'std': std_trust,
-      'robust': cv_alpha < 0.12  # Critério de robustez
+      'robust': cv_alpha < 0.12 
     }
 
     print(f"   ✅ CV = {cv_alpha:.4f} {'(ROBUST)' if cv_alpha < 0.12 else '(REVIEW)'}")
-
-    # ===================================================================
+    
     # 2. TEST SYMBIOSIS THRESHOLD
-    # ===================================================================
     print("\n📊 Testing Symbiosis Threshold sensitivity...")
     threshold_values = [0.63, 0.70, 0.77]  # (±10%)
     threshold_results = []
@@ -142,9 +138,10 @@ class AdvancedAnalysis:
     for threshold in threshold_values:
       print(f"   Testing threshold = {threshold}...", end = '')
 
+      # Modify parameter
       TheoreticalParameters.TRUST_THRESHOLD_SYMBIOSIS = threshold
 
-      # Executar simulação
+      # Run simulation
       result = self.run_single_experiment(
         ConfigurationType.MAJORITY_ROBOT,
         ExperimentScale.SMALL,
@@ -152,7 +149,7 @@ class AdvancedAnalysis:
         seed = 42
       )
 
-      # Verificar se atinge o novo threshold
+      # Check if achieves new threshold
       achieved = 1 if result['final_trust'] >= threshold else 0
 
       threshold_results.append({
@@ -163,9 +160,10 @@ class AdvancedAnalysis:
 
       print(f" Trust: {result['final_trust']:.3f}, Symbiosis: {'✅' if achieved else '❌'}")
 
+    # Restore original
     TheoreticalParameters.TRUST_THRESHOLD_SYMBIOSIS = original_threshold
 
-    # Calcular variabilidade nas taxas de symbiosis0
+    # Calculate variability
     symbiosis_rates = [r['symbiosis_achieved'] for r in threshold_results]
     mean_rate = np.mean(symbiosis_rates)
     std_rate = np.std(symbiosis_rates, ddof = 1) if len(symbiosis_rates) > 1 else 0
@@ -174,7 +172,7 @@ class AdvancedAnalysis:
       'results': threshold_results,
       'mean_rate': mean_rate,
       'std_rate': std_rate,
-      'robust': std_rate < 0.35,  # Critério ajustado para binário
+      'robust': std_rate < 0.35,
       'interpretation': 'Threshold effects expected for binary outcomes'
     }
 
