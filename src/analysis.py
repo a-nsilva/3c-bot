@@ -1,6 +1,7 @@
 """
 ADVANCED ANALYSIS MODULE
 Sensitivity analysis and scalability validation
+
 This module contains computationally intensive analyses that test
 the robustness and generalizability of simulation results.
 """
@@ -18,11 +19,7 @@ from .core import (
 )
 
 class AdvancedAnalysis:
-  """
-  Performs advanced statistical analyses:
-    - Sensitivity analysis (parameter robustness)
-    - Population scalability validation
-  """
+  """ Performs advanced statistical analyses for research validation"""
   
   def __init__(self, results_dir):
     self.results_dir = results_dir
