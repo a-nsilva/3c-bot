@@ -1,6 +1,8 @@
 """
 ADVANCED ANALYSIS MODULE
 Sensitivity analysis and scalability validation
+This module contains computationally intensive analyses that test
+the robustness and generalizability of simulation results.
 """
 
 from typing import Dict
