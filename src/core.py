@@ -238,23 +238,15 @@ class RobotAgent(Agent):
     """Cooperation based on Asimov's Laws"""
     base_cooperation = self.processing_power
 
-    # Law 1 (Highest Priority): Do no harm - detect high human stress
-    # Threshold: 0.20 represents transition from normal to harmful stress
-    # (Bakker & Demerouti, 2007)
-    # Modifier: 1.3× (30% increase) provides meaningful support without
-    # complete takeover
+    # Law 1: Do no harm - detect high human stress
     if partner.type == "human" and partner.stress > TheoreticalParameters.HARM_THRESHOLD: 
       base_cooperation *= 1.3  # Increase support
 
-    # Law 2 (Secondary Priority): Obey humans - prioritize human partners
-    # Modifier: 1.1× (10% boost) acknowledges human leadership while
-    # preserving robot initiative
+    # Law 2: Obey humans - prioritize human partners
     if partner.type == "human":
       base_cooperation *= 1.1
 
-    # Law 3 (Tertiary Priority): Self-preservation - avoid overload
-    # Threshold: 0.80 represents critical system stress requiring recovery
-    # Modifier: 0.8× (20% reduction) allows temporary load shedding
+    # Law 3: Self-preservation - avoid overload
     if self.stress > 0.8:
       base_cooperation *= 0.8
 
