@@ -68,13 +68,15 @@ class AdvancedAnalysis:
   
   def run_sensitivity_analysis(self) -> Dict:
     """
-    Análise de sensibilidade dos parâmetros principais
-    Parâmetros testados:
-      - Trust learning rate (α): [0.05, 0.10, 0.15] ()
-      - Symbiosis threshold: [0.63, 0.70, 0.77] (±10%)
-      - Stress threshold: [0.15, 0.20, 0.25] (±25%)
-    """
+    Sensitivity analysis of main model parameters
     
+    Tests robustness of results with parameter variations:
+    - Trust learning rate (α): [0.05, 0.10, 0.15]
+    - Symbiosis threshold: [0.63, 0.70, 0.77] (±10%)
+    
+    Returns:
+        Dict with sensitivity analysis results
+    """    
     print("\n" + "="*70)
     print("🔬 SENSITIVITY ANALYSIS - Parameter Robustness Testing")
     print("="*70)
