@@ -178,9 +178,7 @@ class AdvancedAnalysis:
 
     print(f"   ✅ Success rate: {mean_rate:.2f} ± {std_rate:.2f} {'(STABLE)' if std_rate < 0.35 else '(VARIABLE)'}")
 
-    # ===================================================================
-    # 3. RESUME
-    # ===================================================================
+    # 3. SUMMARY
     print("\n" + "="*70)
     print("📈 SENSITIVITY ANALYSIS SUMMARY")
     print("="*70)
@@ -201,7 +199,7 @@ class AdvancedAnalysis:
     print(f"   {'✅ MODEL IS ROBUST' if all_robust else '⚠️ REVIEW REQUIRED'}")
     print(f"   Results demonstrate {'stable patterns' if all_robust else 'sensitivity'} in human-robot creative cooperation dynamics.")
 
-    # Adicionar metadata
+    # Metadata
     sensitivity_results['metadata'] = {
       'original_learning_rate': original_learning_rate,
       'original_threshold': original_threshold,
@@ -211,21 +209,17 @@ class AdvancedAnalysis:
       'test_seed': 42
     }
 
-    # Salvar resultados
-    self.save_research_results(sensitivity_results, filename="sensitivity_analysis_results.json")
-
     return sensitivity_results
   
   def validate_population_scalability(self) -> Dict:
     """
-    Valida consistência em diferentes escalas populacionais
-    Metodologia:
-      - 3 escalas populacionais (SMALL = 30, MEDIUM = 60, LARGE = 90)
-      - 3 replicações por escala (seeds 42, 43, 44)
-      - 1000 ciclos por simulação (consistente com experimento principal)
-      - Configuração: MAJORITY_ROBOT (melhor configuração identificada)
+    Validate result consistency across population scales
+        
+    Tests [30, 60, 90] agents with multiple replications to verify
+    that findings generalize beyond specific population sizes.
+    
     Returns:
-        dict: Resultados de escalabilidade com correlações entre escalas
+      Dict with scalability validation results
     """
     
     print("\n" + "="*70)
@@ -239,12 +233,10 @@ class AdvancedAnalysis:
     ]
 
     results_by_scale = {}
-    n_replications = 3  # Múltiplas seeds para robustez
-    cycles = 1000       # Consistente com experimento principal
+    n_replications = 3 
+    cycles = 1000  
 
-    # ===================================================================
-    # PHASE 1: Test each population scale with multiple replications
-    # ===================================================================
+    # PHASE 1: Test each population scale 
     for scale in scales_to_test:
       pop_size = scale.value[0]
       print(f"\n🔬 Testing population size: {pop_size} agents ({n_replications} replications, {cycles} cycles)")
@@ -256,9 +248,9 @@ class AdvancedAnalysis:
 
       for rep in range(n_replications):
         seed = 42 + rep
-        print(f"   Rep {rep+1}/{n_replications} (seed={seed})...", end = '', flush=True)
+        print(f"   Rep {rep+1}/{n_replications} (seed={seed})...", end = '', flush = True)
 
-        # Execute single experiment
+        # Execute simulation
         result = self.run_single_experiment(
           ConfigurationType.MAJORITY_ROBOT,
           scale,
@@ -276,33 +268,23 @@ class AdvancedAnalysis:
         if result.get('convergence_cycle'):
           convergence_cycles.append(result['convergence_cycle'])
 
-        print(f" Trust={result['final_trust']:.3f}, Time={result['execution_time']:.1f}s")
+        print(f" Trust = {result['final_trust']:.3f}, "
+              f"Time = {result['execution_time']:.1f}s")
 
-      # Calculate aggregate statistics for this scale
-      mean_trust = np.mean(trust_values)
-      std_trust = np.std(trust_values, ddof=1) if len(trust_values) > 1 else 0
-
-      # 95% Confidence Interval
-      if len(trust_values) > 1:
-        ci_95 = stats.t.interval(
-          0.95,
-          len(trust_values)-1,
-          loc = mean_trust,
-          scale=stats.sem(trust_values)
-        )
-      else:
-        ci_95 = (mean_trust, mean_trust)
+      # Calculate statistics using DataCollector method
+      stats_dict = DataCollector.calculate_descriptive_stats(trust_values)
 
       symbiosis_rate = symbiosis_count / n_replications
-      avg_convergence = np.mean(convergence_cycles) if convergence_cycles else None
+      avg_convergence = (np.mean(convergence_cycles) 
+                        if convergence_cycles else None)
       avg_exec_time = np.mean(execution_times)
-
+      
       results_by_scale[pop_size] = {
         'trust_values': trust_values,
-        'mean_trust': mean_trust,
-        'std_trust': std_trust,
-        'ci_95_lower': ci_95[0],
-        'ci_95_upper': ci_95[1],
+        'mean_trust': stats_dict['mean'],
+        'std_trust': stats_dict['std'],
+        'ci_95_lower': stats_dict['ci_95_lower'],
+        'ci_95_upper': stats_dict['ci_95_upper'],
         'symbiosis_rate': symbiosis_rate,
         'symbiosis_count': symbiosis_count,
         'avg_convergence': avg_convergence,
@@ -310,34 +292,33 @@ class AdvancedAnalysis:
         'avg_execution_time': avg_exec_time,
         'n_replications': n_replications
       }
-
-      print(f"   📊 Summary: Trust = {mean_trust:.3f} ± {std_trust:.3f}")
-      print(f"      95% CI: [{ci_95[0]:.3f}, {ci_95[1]:.3f}]")
-      print(f"      Symbiosis: {symbiosis_rate:.0%} ({symbiosis_count}/{n_replications})")
+      
+      print(f"   📊 Summary: Trust = {stats_dict['mean']:.3f} ± "
+            f"{stats_dict['std']:.3f}")
+      print(f"      95% CI: [{stats_dict['ci_95_lower']:.3f}, "
+            f"{stats_dict['ci_95_upper']:.3f}]")
+      print(f"      Symbiosis: {symbiosis_rate:.0%} "
+            f"({symbiosis_count}/{n_replications})")
       if avg_convergence:
         print(f"      Avg convergence: cycle {avg_convergence:.0f}")
 
-    # ===================================================================
     # PHASE 2: Statistical Analysis
-    # ===================================================================
     print(f"\n📈 SCALABILITY ANALYSIS:")
 
     pop_sizes = list(results_by_scale.keys())
     mean_trusts = [results_by_scale[p]['mean_trust'] for p in pop_sizes]
-    std_trusts = [results_by_scale[p]['std_trust'] for p in pop_sizes]
-
+    
     # Overall statistics
     overall_mean = np.mean(mean_trusts)
     overall_std = np.std(mean_trusts, ddof=1) if len(mean_trusts) > 1 else 0
-
-    # Coefficient of Variation (measure of relative variability)
+    
+    # Coefficient of Variation
     cv = overall_std / overall_mean if overall_mean > 0 else 0
 
-    # Correlation between population size and trust
+    # Correlation
     if len(mean_trusts) >= 3:
       # Pearson correlation
       correlation_pearson, p_value_pearson = stats.pearsonr(pop_sizes, mean_trusts)
-      # Spearman correlation (rank-based, more robust)
       correlation_spearman, p_value_spearman = stats.spearmanr(pop_sizes, mean_trusts)
     else:
       correlation_pearson = correlation_spearman = None
@@ -346,18 +327,16 @@ class AdvancedAnalysis:
     print(f"   Trust range: [{min(mean_trusts):.3f}, {max(mean_trusts):.3f}]")
     print(f"   Mean trust: {overall_mean:.3f} ± {overall_std:.3f}")
     print(f"   CV: {cv:.3f} {'(STABLE)' if cv < 0.10 else '(VARIABLE)'}")
-
-    if correlation_pearson is not None:
-      print(f"   Pearson correlation: r = {correlation_pearson:.3f}, p = {p_value_pearson:.3f}")
-      print(f"   Spearman correlation: ρ = {correlation_spearman:.3f}, p = {p_value_spearman:.3f}")
-
-    # Stability assessment
+    
+    if correlation_spearman is not None:
+      print(f"   Spearman correlation: ρ = {correlation_spearman:.3f}, "
+            f"p = {p_value_spearman:.3f}")
+    
     stable = cv < 0.10
-    print(f"   ✅ Results {'are stable' if stable else 'show variability'} across population scales")
+    print(f"   ✅ Results {'are stable' if stable else 'show variability'} "
+          f"across population scales")
 
-    # ===================================================================
     # PHASE 3: Configuration Ranking Consistency
-    # ===================================================================
     print(f"\n🔍 Validating configuration ranking consistency...")
     print(f"   Testing 3 configurations at MEDIUM scale (60 agents, {n_replications} reps each)")
 
@@ -368,37 +347,41 @@ class AdvancedAnalysis:
     ]
 
     ranking_results = {}
-
+        
     for config in configs_to_compare:
       print(f"\n   Configuration: {config.name}")
-
+      
       config_trust_values = []
-
+      
       for rep in range(n_replications):
         seed = 42 + rep
-        print(f"      Rep {rep+1}/{n_replications} (seed={seed})...", end='', flush=True)
-
-        result = self.run_single_experiment(
+        print(f"      Rep {rep+1}/{n_replications} (seed={seed})...", 
+              end='', flush=True)
+          
+        result = self._run_single_simulation(
           config,
           ExperimentScale.MEDIUM,
           cycles = cycles,
           seed = seed
         )
-
+        
         config_trust_values.append(result['final_trust'])
         print(f" Trust = {result['final_trust']:.3f}")
-
-      mean_config_trust = np.mean(config_trust_values)
-      std_config_trust = np.std(config_trust_values, ddof=1) if len(config_trust_values) > 1 else 0
-
+      
+      # Calculate statistics
+      config_stats = DataCollector.calculate_descriptive_stats(
+          config_trust_values
+      )
+      
       ranking_results[config.name] = {
         'trust_values': config_trust_values,
-        'mean_trust': mean_config_trust,
-        'std_trust': std_config_trust
+        'mean_trust': config_stats['mean'],
+        'std_trust': config_stats['std']
       }
-
-      print(f"      Mean: {mean_config_trust:.3f} ± {std_config_trust:.3f}")
-
+      
+      print(f"      Mean: {config_stats['mean']:.3f} ± "
+            f"{config_stats['std']:.3f}")
+    
     # Check if MAJORITY_ROBOT is still superior
     robot_majority_trust = ranking_results['MAJORITY_ROBOT']['mean_trust']
     is_superior = all(
@@ -406,23 +389,23 @@ class AdvancedAnalysis:
       for name, data in ranking_results.items()
       if name != 'MAJORITY_ROBOT'
     )
-
-    print(f"\n   Robot-majority superiority maintained: {'✅ YES' if is_superior else '❌ NO'}")
-
+    
+    print(f"\n   Robot-majority superiority maintained: "
+          f"{'✅ YES' if is_superior else '❌ NO'}")
+    
     # Print ranking
     sorted_configs = sorted(
       ranking_results.items(),
       key = lambda x: x[1]['mean_trust'],
       reverse = True
     )
-
+    
     print(f"\n   📊 Configuration Ranking (60 agents):")
     for rank, (config_name, data) in enumerate(sorted_configs, 1):
-      print(f"      #{rank}: {config_name}: {data['mean_trust']:.3f} ± {data['std_trust']:.3f}")
+      print(f"      #{rank}: {config_name}: "
+            f"{data['mean_trust']:.3f} ± {data['std_trust']:.3f}")
 
-    # ===================================================================
-    # PHASE 4: Compile Final Results
-    # ===================================================================
+    # PHASE 4: Compile results
     scalability_summary = {
       'results_by_scale': results_by_scale,
       'overall_mean': overall_mean,
@@ -444,54 +427,37 @@ class AdvancedAnalysis:
       }
     }
 
-    # ===================================================================
-    # PHASE 5: Save Results
-    # ===================================================================
-    self.save_research_results(
-      scalability_summary,
-      filename = "scalability_validation_results.json"
-    )
-
-    # ===================================================================
-    # PHASE 6: Final Summary
-    # ===================================================================
+    # PHASE 5: Final Summary
     print("\n" + "="*70)
     print("📊 SCALABILITY VALIDATION SUMMARY")
     print("="*70)
-
-    print(f"\n✅ Tested {len(scales_to_test)} population scales with {n_replications} replications each")
-    print(f"   Total simulations: {scalability_summary['methodology']['total_simulations']}")
-
+    
+    print(f"\n✅ Tested {len(scales_to_test)} population scales with "
+          f"{n_replications} replications each")
+    print(f"   Total simulations: "
+          f"{scalability_summary['methodology']['total_simulations']}")
+    
     print(f"\n📈 Key Findings:")
     print(f"   • Mean trust across scales: {overall_mean:.3f} ± {overall_std:.3f}")
     print(f"   • Coefficient of variation: {cv:.3f}")
-    print(f"   • Stability: {'✅ STABLE (CV < 0.10)' if stable else '⚠️ VARIABLE (CV ≥ 0.10)'}")
-
+    print(f"   • Stability: {'✅ STABLE' if stable else '⚠️ VARIABLE'}")
+    
     if correlation_spearman is not None:
       print(f"   • Spearman correlation: ρ = {correlation_spearman:.3f}")
-      if abs(correlation_spearman) < 0.3:
-        print(f"     → Weak/no relationship between population size and trust")
-      elif abs(correlation_spearman) < 0.7:
-        print(f"     → Moderate relationship")
-      else:
-        print(f"     → Strong relationship")
-
+    
     print(f"\n🏆 Configuration Ranking:")
-    print(f"   • Robot-majority superiority: {'✅ MAINTAINED' if is_superior else '❌ NOT MAINTAINED'}")
-
+    print(f"   • Robot-majority superiority: "
+          f"{'✅ MAINTAINED' if is_superior else '❌ NOT MAINTAINED'}")
+    
     print(f"\n💡 Interpretation:")
     if stable and is_superior:
       print(f"   ✅ Results demonstrate robust scalability")
-      print(f"   ✅ Robot-majority configuration remains optimal across scales")
-      print(f"   ✅ Findings generalize beyond specific population size")
+      print(f"   ✅ Robot-majority configuration remains optimal")
     elif stable and not is_superior:
-      print(f"   ⚠️ Results are stable but ranking changed")
-      print(f"   ⚠️ Robot-majority may not be universally optimal")
+      print(f"   ⚠️ Results stable but ranking changed")
     elif not stable and is_superior:
-      print(f"   ⚠️ Robot-majority is superior but trust varies across scales")
-      print(f"   ⚠️ Population size may moderate outcomes")
+      print(f"   ⚠️ Robot-majority superior but trust varies")
     else:
-      print(f"   ⚠️ Results show both instability and ranking changes")
-      print(f"   ⚠️ Findings may be scale-dependent")
-
+      print(f"   ⚠️ Results show instability and ranking changes")
+    
     return scalability_summary
