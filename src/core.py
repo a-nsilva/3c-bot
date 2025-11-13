@@ -269,6 +269,7 @@ class RobotAgent(Agent):
 # ========== DATA COLLECTOR ==========
 class DataCollector:
   """Scientific data collector with validation metrics"""
+  
   def __init__(self):
     self.metrics_history: List[Dict] = []
     ##self.theoretical_params = TheoreticalParameters() #reviewer
@@ -286,7 +287,12 @@ class DataCollector:
 
   @staticmethod
   def calculate_descriptive_stats(values: List[float]) -> Dict:
-    """Calculate mean, std, CI95 for a list of values"""
+    """
+    Calculate mean, std, CI95 for a list of values
+    
+    Returns:
+            Dict with keys: mean, std, ci_95_lower, ci_95_upper
+    """
     if not values:
       return {
         'mean': 0.0, 'std': 0.0,
