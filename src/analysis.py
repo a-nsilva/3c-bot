@@ -21,8 +21,50 @@ from .core import (
 class AdvancedAnalysis:
   """ Performs advanced statistical analyses for research validation"""
   
-  def __init__(self, results_dir):
+  def __init__(self, results_dir: Path):
     self.results_dir = results_dir
+    self.results_dir.mkdir(parents = True, exist_ok = True)
+    
+  def _run_single_simulation(self, config_type: ConfigurationType,
+                            scale: ExperimentScale,
+                            cycles: int = 1000,
+                            seed: int = 42) -> Dict:
+    """
+    Helper method to run a single simulation
+    
+    Args:
+      config_type: Population configuration
+      scale: Experimental scale
+      cycles: Number of simulation cycles
+      seed: Random seed for reproducibility
+        
+    Returns:
+      Dict with simulation results
+    """
+    # Set reproducibility
+    np.random.seed(seed)
+    random.seed(seed)
+    
+    # Calculate population
+    population, _ = scale.value
+    humans_ratio, robots_ratio = config_type.value
+    num_humans = round(population * humans_ratio)
+    num_robots = population - num_humans
+    
+    # Run simulation
+    simulator = CoreEngine(num_humans, num_robots, config_type)
+    result = simulator.run_simulation(cycles)
+    
+    # Extract summary
+    data_collector = result['data_collector']
+    summary = data_collector.get_summary()
+    
+    return {
+      'final_trust': summary['trust_statistics']['final'],
+      'achieved_symbiosis': summary['achieved_symbiosis'],
+      'convergence_cycle': summary.get('convergence_cycle'),
+      'execution_time': result['execution_time']
+    }
   
   def run_sensitivity_analysis(self) -> Dict:
     """
