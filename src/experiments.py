@@ -30,7 +30,7 @@ from .visualization import ResearchVisualizer
 from .analysis import AdvancedAnalysis
 
 class ResearchExperiment:
-   """Main experiment orchestrator"""
+  """Main experiment orchestrator"""
   
   def __init__(self):
     self.results_dir = Path("results/reports")
