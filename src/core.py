@@ -1,20 +1,5 @@
 """
-COMPUTATIONAL MODELING OF BEHAVIORAL DYNAMICS IN HUMAN-ROBOT ORGANIZATIONAL COMMUNITIES
 CORE SIMULATION ENGINE
-=======================================================================================
-Author: 
-  Alexandre do Nascimento Silva (1,2)
-  Sanaz Nikghadam-Hojjati (3)
-  José Barata (3)
-  Luis A. Estrada Jimenez (3)
-
-Affiliation: 
-  (1) Universidade Estadual de Santa Cruz (UESC), Departamento de Engenharias e Computação
-  (2) Universidade do Estado da Bahia (UNEB), Programa de Pós-graduação em Modelagem e Simulação de Biossistemas (PPGMSB)
-  (3) UNINOVA—Center of Technology and Systems (CTS)
-
-Contact:
-  alnsilva@uesc.br
 
 Theoretical Foundation:
   - Social Value Orientation (Van Lange, 1999; Balliet et al., 2009)
