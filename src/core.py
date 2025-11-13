@@ -1,5 +1,6 @@
 """
 COMPUTATIONAL MODELING OF BEHAVIORAL DYNAMICS IN HUMAN-ROBOT ORGANIZATIONAL COMMUNITIES
+CORE SIMULATION ENGINE
 =======================================================================================
 Author: 
   Alexandre do Nascimento Silva (1,2)
