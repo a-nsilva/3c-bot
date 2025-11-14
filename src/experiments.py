@@ -12,13 +12,14 @@ Handles:
 import json
 import random
 import time
-from datetime import datetime
+
 from pathlib import Path
-from typing import Dict, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 from scipy import stats
 
+from .analysis import AdvancedAnalysis
 from .core import (
     CoreEngine,
     DataCollector,
@@ -27,19 +28,18 @@ from .core import (
     TheoreticalParameters,
 )
 from .visualization import ResearchVisualizer
-from .analysis import AdvancedAnalysis
 
 class ResearchExperiment:
   """Main experiment orchestrator"""
   
   def __init__(self):
-    self.results_dir = Path("results/reports")
-    self.results_dir.mkdir(parents = True, exist_ok = True)
+    self.reports_dir = Path("results/reports")
+    self.reports_dir.mkdir(parents = True, exist_ok = True)
     self.plots_dir = Path("results/plots")
     self.plots_dir.mkdir(parents = True, exist_ok = True)
     
     self.visualizer = ResearchVisualizer()
-    self.advanced_analysis = AdvancedAnalysis(self.results_dir)
+    self.advanced_analysis = AdvancedAnalysis(self.reports_dir)
 
 
   def _calculate_population(self, config_type: ConfigurationType, 
@@ -74,7 +74,7 @@ class ResearchExperiment:
     print(f"   File size: {filepath.stat().st_size / 1024:.1f} KB")
     
   def _print_results_summary(self, results: Dict, title: str = "RESULTS"):
-    print(f"\n🏆 {title}:")
+    print(f"\n  {title}:")
     
     if 'mean_trust' in results:
       print(f"   Mean trust: {results['mean_trust']:.3f} ± {results.get('std_trust', 0):.3f}")
@@ -154,7 +154,7 @@ class ResearchExperiment:
     Returns:
       Dict with demo results
     """
-    print("🚀 RESEARCH DEMO - Quick validation")
+    print("RESEARCH DEMO - Quick validation")
     print("="*50)
 
     result = self.run_single_experiment(
@@ -166,7 +166,7 @@ class ResearchExperiment:
 
     print(f"\nDEMO RESULTS:")
     print(f"Final trust: {result['final_trust']:.3f}")
-    print(f"Symbiosis achieved: {'✅ Yes' if result['achieved_symbiosis'] else '❌ No'}")
+    print(f"Symbiosis achieved: {'  Yes' if result['achieved_symbiosis'] else '  No'}")
     print(f"Convergence: {result['convergence_cycle'] or 'Not detected'}")
 
     # Generate visualizations
@@ -292,7 +292,7 @@ class ResearchExperiment:
         config_results.append(single_result)
         trust_values.append(single_result['final_trust'])
 
-      print(f"   ✅ Completed: {replications} replications                    ")
+      print(f"     Completed: {replications} replications                    ")
 
       # SCIENTIFIC ANALYSIS - Complete statistical processing
       mean_trust = np.mean(trust_values)
@@ -339,12 +339,12 @@ class ResearchExperiment:
     print(f"\n  Statistical Validation:")##reviewer
     assumptions = anova_results.get('assumptions_validated', {})
     if assumptions:
-      print(f"   Normality: {'✅ Satisfied' if assumptions.get('all_groups_normal') else '⚠️ Violated'}")
-      print(f"   Homogeneity: {'✅ Satisfied' if assumptions.get('homogeneity_satisfied') else '⚠️ Violated'}")
+      print(f"   Normality: {'  Satisfied' if assumptions.get('all_groups_normal') else '  Violated'}")
+      print(f"   Homogeneity: {'  Satisfied' if assumptions.get('homogeneity_satisfied') else '  Violated'}")
       if assumptions.get('assumptions_met'):
-        print(f"   ✅ All ANOVA assumptions validated")
+        print(f"     All ANOVA assumptions validated")
       else:
-        print(f"   ⚠️ Some assumptions violated - results remain valid via robustness")
+        print(f"     Some assumptions violated - results remain valid via robustness")
     # Behavioral distribution validation
     for config_name, config_data in results_by_config.items():
       if 'replications' in config_data and len(config_data['replications']) > 0:
@@ -352,7 +352,7 @@ class ResearchExperiment:
         if 'summary' in first_rep and 'final_metrics' in first_rep['summary']:
           bv = first_rep['summary']['final_metrics'].get('behavioral_validation', {})
           if bv.get('validation_passed'):
-            print(f"   ✅ {config_name}: Behavioral distribution validated (χ²={bv.get('chi2_statistic', 0):.2f}, p={bv.get('p_value', 1):.3f})")
+            print(f"     {config_name}: Behavioral distribution validated (χ²={bv.get('chi2_statistic', 0):.2f}, p={bv.get('p_value', 1):.3f})")
 
     # Best configuration
     best_config = max(results_by_config.keys(),
@@ -382,178 +382,124 @@ class ResearchExperiment:
       }
     }
 
-  def generate_research_visualizations(self, single_result: Optional[Dict] = None,
+  # VISUALIZATION GENERATION    
+  def generate_research_visualizations(self,
+                                      single_result: Optional[Dict] = None,
                                       experiment_results: Optional[Dict] = None,
                                       output_prefix: str = "plot") -> bool:
-    """Generate publication-ready visualizations"""
-
     print("  Generating research visualizations...")
-
+    
     if single_result:
       # Dashboard for single experiment
       data_collector = single_result['data_collector']
+      agents = single_result['agents']
+      
+      save_path = self.plots_dir / output_prefix
+      
+      # Dashboard
       self.visualizer.create_research_dashboard(
         data_collector,
+        agents,
         experiment_results,
-        f"{output_prefix}_single"
+        str(save_path)
       )
-
+      
       # Individual plots
       self.visualizer.save_individual_plots(
         data_collector,
+        agents,
         experiment_results,
-        f"{output_prefix}_single"
+        str(save_path)
       )
-
-      #reviewer
-      if 'agents' in single_result:
-        self.visualizer.create_agent_states_heatmap(
-          data_collector,
-          single_result['agents'],
-          f"{output_prefix}_single"
-        )
-
+    
+      # Agent states dashboard
+      self.visualizer.create_agent_states_dashboard(
+        data_collector,
+        agents,
+        str(save_path)
+      )
+        
     if experiment_results:
-      # Dashboard for multi-configuration comparison
+      # Dashboard for multi-configuration
       best_config = experiment_results['best_config']
       best_data = experiment_results['results_by_config'][best_config]
-
-      # Use first replication of best configuration for temporal data
+      
       if best_data['replications']:
         best_collector = best_data['replications'][0]['data_collector']
+        best_agents = best_data['replications'][0]['agents']
+        
+        save_path = self.plots_dir / f"{output_prefix}"
+        
+        # Dashboard 
         self.visualizer.create_research_dashboard(
           best_collector,
-          experiment_results,
-          f"{self.plots_dir/output_prefix}_complete"
-        )
-        self.visualizer.save_individual_plots(
-          best_collector,
-          experiment_results,
-          f"{self.plots_dir/output_prefix}_complete"
-        )
-
-        #reviewer
-        if 'agents' in best_data['replications'][0]:
-          self.visualizer.create_agent_states_heatmap(
-            best_collector,
-            best_data['replications'][0]['agents'],
-            f"{output_prefix}_complete"
-          )
-
-    print("✅ Research visualizations generated!")
-    return True
-
-  # VISUALIZATION GENERATION
-    # =========================================================================
-    
-    def generate_research_visualizations(self,
-                                        single_result: Optional[Dict] = None,
-                                        experiment_results: Optional[Dict] = None,
-                                        output_prefix: str = "plot") -> bool:
-      """
-      Generate publication-ready visualizations
-      
-      Args:
-        single_result: Single experiment result (optional)
-        experiment_results: Multi-config results (optional)
-        output_prefix: Filename prefix
-          
-      Returns:
-        True if successful
-      """
-      print("  Generating research visualizations...")
-      
-      if single_result:
-        # Dashboard for single experiment
-        data_collector = single_result['data_collector']
-        agents = single_result['agents']
-        
-        save_path = self.plots_dir / output_prefix
-        
-        self.visualizer.create_research_dashboard(
-          data_collector,
-          agents,
+          best_agents,
           experiment_results,
           str(save_path)
         )
         
         # Individual plots
         self.visualizer.save_individual_plots(
-          data_collector,
-          agents,
+          best_collector,
+          best_agents,
           experiment_results,
           str(save_path)
         )
-      
-      if experiment_results:
-        # Dashboard for multi-configuration
-        best_config = experiment_results['best_config']
-        best_data = experiment_results['results_by_config'][best_config]
-        
-        if best_data['replications']:
-          best_collector = best_data['replications'][0]['data_collector']
-          best_agents = best_data['replications'][0]['agents']
-          
-          save_path = self.plots_dir / f"{output_prefix}_complete"
-          
-          self.visualizer.create_research_dashboard(
+
+        # Agent states dashboard
+        self.visualizer.create_agent_states_dashboard(
             best_collector,
             best_agents,
-            experiment_results,
             str(save_path)
-          )
-          
-          self.visualizer.save_individual_plots(
-            best_collector,
-            best_agents,
-            experiment_results,
-            str(save_path)
-          )
-      
-      print("  Research visualizations generated!")
-      return True
+        )
+    
+    print("  Research visualizations generated!")
+    return True
 
   # RESULT SAVING  
   def save_research_results(self, experiment_results: Dict,
                             filename: str = None) -> str:
-    """
-    Save results in research-ready JSON format
-    
-    Supports multiple result types:
-      - Complete experiments
-      - Scalability validation
-      - Sensitivity analysis
-      - Single experiments
-    
-    Args:
-      experiment_results: Results dictionary
-      filename: Custom filename (optional)
-        
-    Returns:
-      Path to saved file
-    """
-    if filename is None:
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"result_{timestamp}.json"
-    
-    filepath = self.results_dir / filename
     
     # Detect result type
     result_type = None
     
     if 'results_by_config' in experiment_results:
-        result_type = 'complete_experiment'
+      result_type = 'complete_experiment'
     elif 'results_by_scale' in experiment_results:
-        result_type = 'scalability_validation'
+      result_type = 'scalability_validation'
     elif 'alpha' in experiment_results or 'threshold' in experiment_results:
-        result_type = 'sensitivity_analysis'
+      result_type = 'sensitivity_analysis'
+    elif 'data_collector' in experiment_results and 'methodology' in experiment_results:
+      methodology = experiment_results.get('methodology', {})
+      if methodology.get('scale') == 'SMALL' and methodology.get('total_simulations') == 1:
+          result_type = 'demo_experiment'
+      else:
+          result_type = 'single_experiment'
     elif 'data_collector' in experiment_results:
-        result_type = 'single_experiment'
+      result_type = 'single_experiment'
     else:
-        result_type = 'unknown'
+      result_type = 'unknown'
     
     print(f"     Detected result type: {result_type}")
     
+    if filename is None:
+      timestamp = time.strftime("%Y%m%d_%H%M%S")
+      if result_type == 'demo_experiment':
+        filename = f"demo_{timestamp}.json"
+      elif result_type == 'complete_experiment':
+        scale_name = experiment_results.get('scale', '')
+        if hasattr(scale_name, 'name'):
+          scale_name = scale_name.name.lower()
+        elif isinstance(scale_name, str):
+          scale_name = scale_name.lower()
+        else:
+          scale_name = 'full'
+        filename = f"complete_{scale_name}_{timestamp}.json"
+      else:
+        filename = f"{result_type}_{timestamp}.json"
+    
+    filepath = self.reports_dir / filename
+
     # Prepare JSON data
     json_data = {}
     json_data['result_type'] = result_type
@@ -602,7 +548,7 @@ class ResearchExperiment:
     # Add universal metadata
     json_data['research_metadata'] = {
       'version': '1.0_modular',
-      'timestamp': datetime.now().strftime("%Y%m%d_%H%M%S"),
+      'timestamp': time.strftime("%Y%m%d_%H%M%S"),
       'result_type': result_type,
       'theoretical_foundations': [
         'Social Value Orientation (Van Lange, 1999; Balliet et al., 2009)',
@@ -626,9 +572,8 @@ class ResearchExperiment:
     # Save to file
     with open(filepath, 'w') as f:
       safe_json_data = self._make_json_safe(json_data)
-      json.dump(safe_json_data, f, indent=2)
+      json.dump(safe_json_data, f, indent = 2)
     
     self._log_file_saved(filepath, "Research results")
-    print(f"   Result type: {result_type}")
     
     return str(filepath)
