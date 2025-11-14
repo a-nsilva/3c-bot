@@ -4,13 +4,13 @@ Publication-ready scientific visualizations
 
 Generates comprehensive plots for research papers:
   - Trust evolution dynamics
-  - Trust evolution by behavioral profile
+  - Behavioral profile
   - CCI evolution (Cooperation-Creativity Index)
-  - Organizational phase detection 
+  - Organizational phase 
   - Trust convergence analysis
   - Behavioral profile analysis
-  - Configuration comparison with error bars
-  - Box plot distribution by configuration
+  - Configuration comparison with error bars or Cooperation correlation
+  - Box plot distribution by configuration or Ethical compliance
   - Comprehensive research dashboards
   - Agent state evolution heatmaps
 """
@@ -51,7 +51,7 @@ class ResearchVisualizer:
     ax.set_title(title, fontsize = 14, fontweight = 'bold')
     ax.set_xlabel(xlabel, fontsize = 12)
     if ylabel:
-        ax.set_ylabel(ylabel, fontsize = 12)
+      ax.set_ylabel(ylabel, fontsize = 12)
     ax.grid(True, alpha = 0.3)
     ax.legend(loc = 'best', fontsize = 10)
                                              
@@ -198,7 +198,7 @@ class ResearchVisualizer:
     
     x_pos = np.arange(len(configs))
     bars = ax.bar(x_pos, trust_means, yerr = trust_stds, capsize = 5, alpha = 0.8)
-    bars[0].set_color('gold')
+    #bars[0].set_color('gold')
     
     ax.axhline(y = 0.7, color = 'red', linestyle = '--', alpha = 0.7,
               label='Threshold')
@@ -238,25 +238,9 @@ class ResearchVisualizer:
       ax.set_xlabel('Configuration', fontsize = 12)
       ax.set_ylabel('Trust', fontsize = 12)
       ax.grid(True, alpha = 0.3)
-
-  def _plot_quality_distribution(self, ax, data_collector: DataCollector):
-    """Plot A: Quality distribution histogram"""
-    quality_data = data_collector.raw_data['quality']
-    
-    if len(quality_data) > 10:
-      ax.hist(quality_data, bins = 15, alpha = 0.7, color = 'lightgreen',
-              edgecolor = 'black')
-      ax.axvline(x = np.mean(quality_data), color = 'red', linestyle = '--',
-                label = f'Mean: {np.mean(quality_data):.3f}')
-    
-    ax.set_title('Activity quality distribution', fontsize = 14, fontweight = 'bold')
-    ax.set_xlabel('Quality score', fontsize = 12)
-    ax.set_ylabel('Frequency', fontsize = 12)
-    ax.legend()
-    ax.grid(True, alpha = 0.3)
   
   def _plot_cooperation_correlation(self, ax, data_collector: DataCollector):
-    """Plot B: Trust vs CCI correlation"""
+    """Plot A: Trust vs CCI correlation"""
     trust_data = data_collector.raw_data['trust']
     cci_data = data_collector.raw_data['cci_score']
     
@@ -280,38 +264,8 @@ class ResearchVisualizer:
     ax.set_ylabel('CCI score', fontsize = 12)
     ax.grid(True, alpha = 0.3)
   
-  def _plot_final_metrics_summary(self, ax, data_collector: DataCollector):
-    """Plot C: Final metrics summary"""
-    summary = data_collector.get_summary()
-    trust_stats = summary.get('trust_statistics', {})
-    final_metrics = summary.get('final_metrics', {})
-    
-    metrics_data = {
-      'Trust': trust_stats.get('final', 0),
-      'Quality': final_metrics.get('quality', 0),
-      'CCI': final_metrics.get('cci_score', 0),
-      'Network': final_metrics.get('network_density', 0)
-    }
-    
-    metrics_names = list(metrics_data.keys())
-    metrics_values = list(metrics_data.values())
-    
-    bars = ax.bar(metrics_names, metrics_values,
-                  color = ['blue', 'green', 'orange', 'purple'], alpha = 0.7)
-    
-    for bar, val in zip(bars, metrics_values):
-        height = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2., height + 0.01,
-                f'{val:.3f}', ha='center', va='bottom')
-    
-    ax.set_title('Final metrics summary', fontsize = 14, fontweight = 'bold')
-    ax.set_xlabel('Metrics', fontsize = 12)
-    ax.set_ylabel('Score', fontsize = 12)
-    ax.grid(True, alpha = 0.3)
-    ax.set_ylim(0, 1)
-  
   def _plot_ethical_compliance(self, ax, data_collector: DataCollector):
-    """Plot D: Ethical compliance over time"""
+    """Plot B: Ethical compliance over time"""
     compliance_data = []
     for metrics in data_collector.metrics_history:
       compliance_data.append(metrics.get('ethical_compliance', 0.97))
@@ -454,7 +408,7 @@ class ResearchVisualizer:
                                    agents: List[Agent],
                                    save_path: str = None):
 
-    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+    fig, axes = plt.subplots(2, 2, figsize = (14, 10))
     fig.suptitle('Agent State Evolution Over Simulation Time',
                 fontsize = 16, fontweight = 'bold')
     
@@ -478,9 +432,9 @@ class ResearchVisualizer:
     plt.tight_layout()
     
     if save_path:
-        filename = f"{save_path}_7-agent_states_dashboard.png"
-        plt.savefig(filename, dpi = 300, bbox_inches = 'tight', facecolor = 'white')
-        print(f"✅ Agent States Dashboard saved: {filename}")
+      filename = f"{save_path}_agent_states_dashboard.png"
+      plt.savefig(filename, dpi = 300, bbox_inches = 'tight', facecolor = 'white')
+      print(f"  Agent States Dashboard saved: {filename}")
     
     plt.show()
     return fig
@@ -490,7 +444,7 @@ class ResearchVisualizer:
                                  agents: List[Agent],
                                  experiment_results: Optional[Dict] = None,
                                  save_path: Optional[str] = None):
-    fig, axes = plt.subplots(3, 4, figsize = (20, 20))#20,20
+    fig, axes = plt.subplots(3, 4, figsize = (24, 18))#20,20
     fig.suptitle('Human-Robot Organizational Dynamics: Research Dashboard',
                 fontsize = 16, fontweight = 'bold')
     
@@ -507,22 +461,20 @@ class ResearchVisualizer:
       self._plot_configuration_comparison_mean(axes[1, 2], experiment_results)
       self._plot_trust_distribution_configuration(axes[1, 3], experiment_results)
     else:
-      self._plot_quality_distribution(axes[1, 2], data_collector)
-      self._plot_cooperation_correlation(axes[1, 3], data_collector)
-      #self._plot_final_metrics_summary(axes[2, 2], data_collector)
-      #self._plot_ethical_compliance(axes[2, 3], data_collector)
+      self._plot_cooperation_correlation(axes[1, 2], data_collector)
+      self._plot_ethical_compliance(axes[1, 3], data_collector)
     
     # Row 3: 
-    self._plot_agent_energy(axes[3, 0], data_collector, agents)
-    self._plot_agent_stress(axes[3, 1], data_collector, agents)
-    self._plot_agent_trust(axes[3, 2], data_collector, agents)
-    self._plot_agent_satisfaction(axes[3, 3], data_collector, agents)
+    self._plot_agent_energy(axes[2, 0], data_collector, agents)
+    self._plot_agent_stress(axes[2, 1], data_collector, agents)
+    self._plot_agent_trust(axes[2, 2], data_collector, agents)
+    self._plot_agent_satisfaction(axes[2, 3], data_collector, agents)
 
     plt.tight_layout()
     
     if save_path:
-        plt.savefig(f"{save_path}_research_dashboard.png", dpi = 300, bbox_inches = 'tight')
-        print(f"✅ Research dashboard saved: {save_path}_dashboard.png")
+      plt.savefig(f"{save_path}_research_dashboard.png", dpi = 300, bbox_inches = 'tight')
+      print(f". Research dashboard saved: {save_path}_dashboard.png")
     
     plt.show()
     return fig
@@ -532,17 +484,19 @@ class ResearchVisualizer:
                             experiment_results: Optional[Dict] = None,
                             save_path: Optional[str] = None):
     data_collector_plots = [
-      ('1-trust_evolution', self._plot_trust_evolution, data_collector),
-      ('2-behavioral_profiles', self._plot_behavioral_profiles, data_collector),
-      ('3-organizational_phases', self._plot_organizational_phases, data_collector),
-      ('4-cci_evolution', self._plot_icc_evolution, data_collector),
-      ('5-convergence_analysis', self._plot_convergence_analysis, data_collector),
-      ('6-behavioral_validation', self._plot_behavioral_validation, data_collector),
+      ('1-trust_evolution', self._plot_trust_evolution),
+      ('2-behavioral_profiles', self._plot_behavioral_profiles),
+      ('3-organizational_phases', self._plot_organizational_phases),
+      ('4-cci_evolution', self._plot_cci_evolution),
+      ('5-convergence_analysis', self._plot_convergence_analysis),
+      ('6-behavioral_validation', self._plot_behavioral_validation),
+      ('7-cooperation_correlation', self._plot_cooperation_correlation),
+      ('8-ethical_compliance',self._plot_ethical_compliance)
     ]
     
     experiment_plots = [
       ('7-config_comparison', self._plot_configuration_comparison_mean),
-      ('8-trust_distribution', self._plot_trust_distribution_configuration),
+      ('8-trust_distribution', self._plot_trust_distribution_configuration)
     ]
 
     agent_plots = [
@@ -552,40 +506,44 @@ class ResearchVisualizer:
       ('12-agent_satisfaction', self._plot_agent_satisfaction),
     ]
     
-    all_plots = ([(name, func, 'data_collector')
-                  for name, func in data_collector_plots] +
-                [(name, func, 'experiment_results')
-                  for name, func in experiment_plots] +
-                [(name, func, 'agents_heatmaps')
-                  for name, func in agent_plots])
+    all_plots = ([(name, func) for name, func in data_collector_plots] +
+                  [(name, func) for name, func in experiment_plots] +
+                  [(name, func) for name, func in agent_plots])
     
     saved_files = []
-    print("📊 Generating individual research plots...")
+    print("  Generating individual research plots...")
     
-    for plot_name, plot_func, plot_type in all_plots:
+    for i, (plot_name, plot_func) in enumerate(all_plots):
+      # Determinar tipo pelo índice
+      if i < len(data_collector_plots):
+        plot_type = 'data_collector'
+      elif i < len(data_collector_plots) + len(experiment_plots):
+        plot_type = 'experiment_results'
+      else:
+        plot_type = 'agents_heatmaps'
+      
       if plot_type == 'experiment_results' and experiment_results is None:
-        print(f"   ⚠️ Skipping {plot_name} (no experiment_results)")
+        print(f"     Skipping {plot_name} (no experiment_results)")
         continue
       
       try:
-          fig, ax = plt.subplots(1, 1, figsize = (12, 8))# (10, 6)
-          
-          if plot_type == 'data_collector':
-              plot_func(ax, data_collector)
-          elif plot_type == 'experiment_results':
-              plot_func(ax, experiment_results)
-          else:
-              plot_func(ax, agent_plots)
-          
-          plt.tight_layout()
-          filename = f"{save_path}_{plot_name}.png"
-          fig.savefig(filename, dpi = 300, bbox_inches = 'tight',
-                    facecolor = 'white')
-          saved_files.append(filename)
-          print(f"   ✅ {plot_name}.png")
-          plt.close(fig)
+        fig, ax = plt.subplots(1, 1, figsize = (12, 8))
+        
+        if plot_type == 'data_collector':
+          plot_func(ax, data_collector)
+        elif plot_type == 'experiment_results':
+          plot_func(ax, experiment_results)
+        else:  # agents_heatmaps
+          plot_func(ax, data_collector, agents)
+        
+        plt.tight_layout()
+        filename = f"{save_path}_{plot_name}.png"
+        fig.savefig(filename, dpi = 300, bbox_inches = 'tight', facecolor = 'white')
+        saved_files.append(filename)
+        print(f"     {plot_name}.png")
+        plt.close(fig)
           
       except Exception as e:
-          print(f"   ❌ Error generating {plot_name}: {e}")
+        print(f"     Error generating {plot_name}: {e}")
     
     return saved_files
