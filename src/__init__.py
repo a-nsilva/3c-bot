@@ -44,9 +44,9 @@ from .core import (
 )
 
 # HIGH-LEVEL INTERFACES
+from .analysis import AdvancedAnalysis
 from .experiments import ResearchExperiment
 from .visualization import ResearchVisualizer
-from .analysis import AdvancedAnalysis
 
 # EXPORTS
 __all__ = [
