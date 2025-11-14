@@ -86,7 +86,7 @@ If you use this code in your research, please cite:
 
 ## 📜 License
 
-MIT License - see LICENSE file for details.
+APACHE License - see LICENSE file for details.
 
 
 ## 👥 Authors & Contact
@@ -97,13 +97,13 @@ MIT License - see LICENSE file for details.
   📧 alnsilva@uesc.br
 
 - **Sanaz Nikghadam-Hojjati**  
-  Universidade Nova de Lisboa
+  UNINOVA—Center of Technology and Systems (CTS)
 
 - **José Barata**  
-  Universidade Nova de Lisboa
+  UNINOVA—Center of Technology and Systems (CTS)
 
 - **Luiz Estrada**  
-  Universidade Nova de Lisboa
+  UNINOVA—Center of Technology and Systems (CTS)
 
 ## 🙏 Acknowledgments
 
@@ -111,7 +111,7 @@ This research was supported by:
 - Coordenação de Aperfeiçoamento de Pessoal de Nível Superior (CAPES)
 - Universidade Estadual de Santa Cruz (UESC)
 - Universidade do Estado da Bahia (UNEB)
-- Universidade Nova de Lisboa
+- UNINOVA—Center of Technology and Systems (CTS)
 
 ---
 
