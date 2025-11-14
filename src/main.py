@@ -20,6 +20,7 @@ Contact:
 """
 
 # IMPORTS
+import time
 from .core import ConfigurationType, ExperimentScale
 from .experiments import ResearchExperiment
 
@@ -34,43 +35,44 @@ def print_header():
 
 
 def main_menu():
-  print("\n  RESEARCH OPTIONS:")
-  print("1.   Quick Demo (validation)")
-  print("2.   Complete Experiment (5 configs × N reps)")
-  print("3.   Custom Experiment")
-  print("4.   Advanced Analysis")
-  print("5.   Exit")
+  print("\nRESEARCH OPTIONS:")
+  print("1. Quick Demo (validation)")
+  print("2. Complete Experiment (5 configs × n reps)")
+  print("3. Custom Experiment")
+  print("4. Advanced Analysis")
+  print("5. Exit")
   
   return input("\nSelect option (1-5): ").strip()
 
-
 def advanced_analysis_menu():   
-  print("\n  ADVANCED ANALYSIS:")
-  print("4.1  Sensitivity Analysis")
-  print("4.2  Scalability Validation")
-  print("4.3  Generate Figure 4 (Agent States)")
-  print("4.4  Back to Main Menu")
+  print("\nADVANCED ANALYSIS:")
+  print("4.1 Sensitivity Analysis")
+  print("4.2 Scalability Validation")
+  print("4.3 Back to Main Menu")
   
-  return input("\nSelect option (4.1-4.4): ").strip()
+  return input("\nSelect option (4.1-4.3): ").strip()
 
 # MENU HANDLERS
 def handle_demo(runner: ResearchExperiment):
   print("\n" + "="*70)
-  print("  QUICK DEMO")
+  print("QUICK DEMO")
   print("="*70)
   result = runner.run_demo_experiment()
+
+  timestamp = time.strftime("%Y%m%d_%H%M%S")
+  runner.save_research_results(result, filename = f"demo_{timestamp}.json")
   
-  print("\n  Demo completed successfully!")
-  print(f"   Results saved to: results/reports/")
-  print(f"   Plots saved to: results/plots/")
+  print("\nDemo completed successfully!")
+  print(f"Results saved to: results/reports/")
+  print(f"Plots saved to: results/plots/")
 
 def handle_complete_experiment(runner: ResearchExperiment):
   print("\n" + "="*70)
-  print("  COMPLETE EXPERIMENT")
+  print("COMPLETE EXPERIMENT")
   print("="*70)
   
   # Scale selection
-  print("\n  Select experimental scale:")
+  print("\nSelect experimental scale:")
   scales = list(ExperimentScale)
   for i, s in enumerate(scales, 1):
     pop, reps = s.value
@@ -84,32 +86,27 @@ def handle_complete_experiment(runner: ResearchExperiment):
       scale = scales[scale_idx]
       
       print(f"\n▶ Running {scale.name} experiment...")
-      print(f"  This will take approximately "
-            f"{scale.value[0] * scale.value[1] * 0.8:.0f} seconds")
+      print(f"  Estimated time: {scale.value[0] * scale.value[1] * 0.8:.0f} seconds")
       
-      confirm = input("\nProceed? (y/n): ").strip().lower()
-      if confirm == 'y':
-        results = runner.run_complete_experiment(scale=scale)
-        runner.generate_research_visualizations(
-            experiment_results=results,
-            output_prefix="complete"
-        )
-        runner.save_research_results(results)
-        
-        print("\n  Complete experiment finished!")
-        print(f"   Results saved to: results/reports/")
-        print(f"   Plots saved to: results/plots/")
-      else:
-        print("   Cancelled.")
+      results = runner.run_complete_experiment(scale = scale)
+      scale_prefix = scale.name.lower()
+      runner.generate_research_visualizations(
+          experiment_results = results,
+          output_prefix = f"complete_{scale_prefix}" 
+      )
+      runner.save_research_results(results)
+      
+      print("\nComplete experiment finished!")
+      print(f"Results saved to: results/reports/")
+      print(f"Plots saved to: results/plots/")
     else:
-      print("     Invalid choice")
+      print("Invalid choice")
   except (ValueError, IndexError):
-    print("     Invalid input")
-
+    print("Invalid input")
 
 def handle_custom_experiment(runner: ResearchExperiment):
   print("\n" + "="*70)
-  print("  CUSTOM EXPERIMENT")
+  print("CUSTOM EXPERIMENT")
   print("="*70)
   
   try:
@@ -128,9 +125,18 @@ def handle_custom_experiment(runner: ResearchExperiment):
     # Configuration selection
     print("\n  Select population configuration:")
     configs = list(ConfigurationType)
+    config_prefixes = {
+      'MAJORITY_HUMAN': 'MJ',
+      'HUMAN_LEAN': 'HL', 
+      'BALANCED': 'BL',
+      'ROBOT_LEAN': 'RL',
+      'MAJORITY_ROBOT': 'MR'
+    }
+    
     for i, c in enumerate(configs, 1):
       h, r = c.value
-      print(f"{i}. {int(h*100):2}%H / {int(r*100):2}%R - {c.name}")
+      prefix = config_prefixes[c.name]
+      print(f"{i}. {int(h*100):2}%H / {int(r*100):2}%R - {c.name} ({prefix})")
     
     config_idx = int(input("Choice (1-5): ")) - 1
     if not (0 <= config_idx < len(configs)):
@@ -149,22 +155,21 @@ def handle_custom_experiment(runner: ResearchExperiment):
     print(f"   Population: {config.name}")
     print(f"   Cycles: {cycles}")
     
-    confirm = input("\nProceed? (y/n): ").strip().lower()
-    if confirm == 'y':
-      print(f"\n▶ Running custom experiment...")
-      result = runner.run_single_experiment(config, scale, cycles)
-      runner.generate_research_visualizations(
-          single_result = result,
-          output_prefix = "custom"
-      )
-      
-      print("\n  Custom experiment finished!")
-      print(f"   Results saved to: results/plots/")
-    else:
-      print("   Cancelled.")
+    print(f"\n▶ Running custom experiment...")
+    result = runner.run_single_experiment(config, scale, cycles)
+    scale_name = scale.name.lower()
+    config_prefix = config_prefixes[config.name]
+    runner.generate_research_visualizations(
+        single_result = result,
+        output_prefix = f"custom_{scale_name}_{config_prefix}"
+    )
+    
+    print("\n  Custom experiment finished!")
+    print(f"   Results saved to: results/reports/")
+    print(f"   Plots saved to: results/plots/")
           
   except (ValueError, IndexError) as e:
-      print(f"     Invalid input: {e}")
+    print(f"     Invalid input: {e}")
 
 def handle_advanced_analysis(runner: ResearchExperiment):
   while True:
@@ -177,18 +182,14 @@ def handle_advanced_analysis(runner: ResearchExperiment):
       print("="*70)
       print("This will test parameter robustness (α and threshold).")
       
-      confirm = input("\nProceed? (y/n): ").strip().lower()
-      if confirm == 'y':
-          results = runner.advanced_analysis.run_sensitivity_analysis()
-          runner.save_research_results(
-              results,
-              filename = "sensitivity_analysis_results.json"
-          )
-          print("\n  Sensitivity analysis complete!")
-          print(f"   Results: results/reports/sensitivity_analysis_results.json")
-      else:
-          print("   Cancelled.")
-    
+      results = runner.advanced_analysis.run_sensitivity_analysis()
+      runner.save_research_results(
+          results,
+          filename = "sensitivity_analysis_results.json"
+      )
+      print("\n  Sensitivity analysis complete!")
+      print(f"   Results: results/reports/sensitivity_analysis_results.json")
+       
     elif sub_choice == "4.2":
       # Scalability Validation
       print("\n" + "="*70)
@@ -196,48 +197,15 @@ def handle_advanced_analysis(runner: ResearchExperiment):
       print("="*70)
       print("This will test 3 population scales (30, 60, 90 agents).")        
       
-      confirm = input("\nProceed? (y/n): ").strip().lower()
-      if confirm == 'y':
-        results = runner.advanced_analysis.validate_population_scalability()
-        runner.save_research_results(
-            results,
-            filename = "scalability_validation_results.json"
-        )
-        print("\n  Scalability validation complete!")
-        print(f"   Results: results/reports/scalability_validation_results.json")
-      else:
-        print("   Cancelled.")
-    
-    elif sub_choice == "4.3":
-      # Generate agent states heatmap
-      print("\n" + "="*70)
-      print("  GENERATE FIGURE")
-      print("="*70)
-      print("This will generate agent states heatmap (2×2 grid).")
+      results = runner.advanced_analysis.validate_population_scalability()
+      runner.save_research_results(
+          results,
+          filename = "scalability_validation_results.json"
+      )
+      print("\n  Scalability validation complete!")
+      print(f"   Results: results/reports/scalability_validation_results.json")
       
-      confirm = input("\nProceed? (y/n): ").strip().lower()
-      if confirm == 'y':
-        print("\n▶ Running baseline simulation...")
-        result = runner.run_single_experiment(
-            ConfigurationType.MAJORITY_ROBOT,
-            ExperimentScale.MEDIUM,
-            cycles = 1000,
-            seed = 42
-        )
-        
-        print("▶ Creating Figure 4...")
-        runner.visualizer.create_agent_states_figure(
-            result['data_collector'],
-            result['agents'],
-            "results/plots/figure4"
-        )
-        
-        print("\n✅ Figure 4 generated!")
-        print(f"   Saved: results/plots/figure4_agent_states_2x2.png")
-      else:
-        print("   Cancelled.")
-    
-    elif sub_choice == "4.4":
+    elif sub_choice == "4.3":
       # Back to main menu
       break
     
@@ -271,8 +239,8 @@ def main():
         print("  Thank you for using the simulator!")
         print("="*70)
         print("\n  For academic citation:")
-        print("Silva, A.N. et al. (2025). Behavioral dynamics of creative")
-        print("cooperation in human-3C-bot communities. [Journal Name].")
+        print(". Silva, Alexandre do Nascimento et al. (2025). Behavioral dynamics of creative")
+        print(". cooperation in human-3C-bot communities. [Journal Name].")
         print("="*70)
         break
         
@@ -280,7 +248,7 @@ def main():
         print("     Invalid option. Please choose 1-5.")
       
     except KeyboardInterrupt:
-      print("\n\n   Operation interrupted by user")
+      print("\n\nOperation interrupted by user")
       print("Exiting gracefully...")
       break
     
