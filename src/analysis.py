@@ -7,13 +7,16 @@ the robustness and generalizability of simulation results.
 """
 
 from typing import Dict
+from pathlib import Path
 
 import numpy as np
+import random
 from scipy import stats
 
 from .core import (
   CoreEngine, 
   ConfigurationType, 
+  DataCollector,
   ExperimentScale,
   TheoreticalParameters
 )
@@ -87,7 +90,7 @@ class AdvancedAnalysis:
     sensitivity_results = {}
 
     # 1. TEST TRUST LEARNING RATE (α)
-    print("\n📊 Testing Trust Learning Rate (α) sensitivity...")
+    print("\nTesting Trust Learning Rate (α) sensitivity...")
     alpha_values = [0.05, 0.10, 0.15]
     alpha_results = []
 
@@ -96,8 +99,8 @@ class AdvancedAnalysis:
 
       TheoreticalParameters.TRUST_LEARNING_RATE = alpha
 
-      # Executar simulação pequena
-      result = self.run_single_experiment(
+      # Run a small simulation.
+      result = self._run_single_simulation(
         ConfigurationType.MAJORITY_ROBOT,
         ExperimentScale.SMALL,
         cycles = 1000,
@@ -128,10 +131,10 @@ class AdvancedAnalysis:
       'robust': cv_alpha < 0.12 
     }
 
-    print(f"   ✅ CV = {cv_alpha:.4f} {'(ROBUST)' if cv_alpha < 0.12 else '(REVIEW)'}")
+    print(f"     CV = {cv_alpha:.4f} {'(ROBUST)' if cv_alpha < 0.12 else '(REVIEW)'}")
     
     # 2. TEST SYMBIOSIS THRESHOLD
-    print("\n📊 Testing Symbiosis Threshold sensitivity...")
+    print("\n  Testing Symbiosis Threshold sensitivity...")
     threshold_values = [0.63, 0.70, 0.77]  # (±10%)
     threshold_results = []
 
@@ -142,7 +145,7 @@ class AdvancedAnalysis:
       TheoreticalParameters.TRUST_THRESHOLD_SYMBIOSIS = threshold
 
       # Run simulation
-      result = self.run_single_experiment(
+      result = self._run_single_simulation(
         ConfigurationType.MAJORITY_ROBOT,
         ExperimentScale.SMALL,
         cycles = 1000,
@@ -176,27 +179,27 @@ class AdvancedAnalysis:
       'interpretation': 'Threshold effects expected for binary outcomes'
     }
 
-    print(f"   ✅ Success rate: {mean_rate:.2f} ± {std_rate:.2f} {'(STABLE)' if std_rate < 0.35 else '(VARIABLE)'}")
+    print(f"     Success rate: {mean_rate:.2f} ± {std_rate:.2f} {'(STABLE)' if std_rate < 0.35 else '(VARIABLE)'}")
 
     # 3. SUMMARY
     print("\n" + "="*70)
-    print("📈 SENSITIVITY ANALYSIS SUMMARY")
+    print("SENSITIVITY ANALYSIS SUMMARY")
     print("="*70)
 
     print(f"\n1. Trust Learning Rate (α):")
     print(f"   - Coefficient of Variation: {cv_alpha:.4f}")
     print(f"   - Range: [{min(trust_values):.3f}, {max(trust_values):.3f}]")
     print(f"   - Mean ± SD: {mean_trust:.3f} ± {std_trust:.3f}")
-    print(f"   - Robustness: {'✅ PASS (CV < 0.12)' if cv_alpha < 0.12 else '⚠️ REVIEW (CV >= 0.12)'}")
+    print(f"   - Robustness: {'  PASS (CV < 0.12)' if cv_alpha < 0.12 else '  REVIEW (CV >= 0.12)'}")
 
     print(f"\n2. Symbiosis Threshold:")
     print(f"   - Success Rate: {mean_rate:.2f} ± {std_rate:.2f}")
-    print(f"   - Robustness: {'✅ PASS (SD < 0.35)' if std_rate < 0.35 else '⚠️ REVIEW (SD >= 0.35)'}")
+    print(f"   - Robustness: {'  PASS (SD < 0.35)' if std_rate < 0.35 else '  REVIEW (SD >= 0.35)'}")
     print(f"   - Note: Binary outcomes (pass/fail) naturally show higher variance")
 
     print(f"\n3. Overall Assessment:")
     all_robust = sensitivity_results['alpha']['robust'] and sensitivity_results['threshold']['robust']
-    print(f"   {'✅ MODEL IS ROBUST' if all_robust else '⚠️ REVIEW REQUIRED'}")
+    print(f"   {'  MODEL IS ROBUST' if all_robust else '  REVIEW REQUIRED'}")
     print(f"   Results demonstrate {'stable patterns' if all_robust else 'sensitivity'} in human-robot creative cooperation dynamics.")
 
     # Metadata
@@ -223,7 +226,7 @@ class AdvancedAnalysis:
     """
     
     print("\n" + "="*70)
-    print("📊 POPULATION SCALABILITY VALIDATION")
+    print("POPULATION SCALABILITY VALIDATION")
     print("="*70)
 
     scales_to_test = [
@@ -251,7 +254,7 @@ class AdvancedAnalysis:
         print(f"   Rep {rep+1}/{n_replications} (seed={seed})...", end = '', flush = True)
 
         # Execute simulation
-        result = self.run_single_experiment(
+        result = self._run_single_simulation(
           ConfigurationType.MAJORITY_ROBOT,
           scale,
           cycles = cycles,
@@ -293,7 +296,7 @@ class AdvancedAnalysis:
         'n_replications': n_replications
       }
       
-      print(f"   📊 Summary: Trust = {stats_dict['mean']:.3f} ± "
+      print(f"Summary: Trust = {stats_dict['mean']:.3f} ± "
             f"{stats_dict['std']:.3f}")
       print(f"      95% CI: [{stats_dict['ci_95_lower']:.3f}, "
             f"{stats_dict['ci_95_upper']:.3f}]")
@@ -303,7 +306,7 @@ class AdvancedAnalysis:
         print(f"      Avg convergence: cycle {avg_convergence:.0f}")
 
     # PHASE 2: Statistical Analysis
-    print(f"\n📈 SCALABILITY ANALYSIS:")
+    print(f"\nSCALABILITY ANALYSIS:")
 
     pop_sizes = list(results_by_scale.keys())
     mean_trusts = [results_by_scale[p]['mean_trust'] for p in pop_sizes]
@@ -333,7 +336,7 @@ class AdvancedAnalysis:
             f"p = {p_value_spearman:.3f}")
     
     stable = cv < 0.10
-    print(f"   ✅ Results {'are stable' if stable else 'show variability'} "
+    print(f"     Results {'are stable' if stable else 'show variability'} "
           f"across population scales")
 
     # PHASE 3: Configuration Ranking Consistency
@@ -391,7 +394,7 @@ class AdvancedAnalysis:
     )
     
     print(f"\n   Robot-majority superiority maintained: "
-          f"{'✅ YES' if is_superior else '❌ NO'}")
+          f"{'  YES' if is_superior else '  NO'}")
     
     # Print ranking
     sorted_configs = sorted(
@@ -429,35 +432,35 @@ class AdvancedAnalysis:
 
     # PHASE 5: Final Summary
     print("\n" + "="*70)
-    print("📊 SCALABILITY VALIDATION SUMMARY")
+    print("SCALABILITY VALIDATION SUMMARY")
     print("="*70)
     
-    print(f"\n✅ Tested {len(scales_to_test)} population scales with "
+    print(f"\nTested {len(scales_to_test)} population scales with "
           f"{n_replications} replications each")
     print(f"   Total simulations: "
           f"{scalability_summary['methodology']['total_simulations']}")
     
-    print(f"\n📈 Key Findings:")
+    print(f"\nKey Findings:")
     print(f"   • Mean trust across scales: {overall_mean:.3f} ± {overall_std:.3f}")
     print(f"   • Coefficient of variation: {cv:.3f}")
-    print(f"   • Stability: {'✅ STABLE' if stable else '⚠️ VARIABLE'}")
+    print(f"   • Stability: {'  STABLE' if stable else '  VARIABLE'}")
     
     if correlation_spearman is not None:
       print(f"   • Spearman correlation: ρ = {correlation_spearman:.3f}")
     
-    print(f"\n🏆 Configuration Ranking:")
+    print(f"\n  Configuration Ranking:")
     print(f"   • Robot-majority superiority: "
-          f"{'✅ MAINTAINED' if is_superior else '❌ NOT MAINTAINED'}")
+          f"{'  MAINTAINED' if is_superior else '❌ NOT MAINTAINED'}")
     
-    print(f"\n💡 Interpretation:")
+    print(f"\nInterpretation:")
     if stable and is_superior:
-      print(f"   ✅ Results demonstrate robust scalability")
-      print(f"   ✅ Robot-majority configuration remains optimal")
+      print(f"     Results demonstrate robust scalability")
+      print(f"     Robot-majority configuration remains optimal")
     elif stable and not is_superior:
-      print(f"   ⚠️ Results stable but ranking changed")
+      print(f"     Results stable but ranking changed")
     elif not stable and is_superior:
-      print(f"   ⚠️ Robot-majority superior but trust varies")
+      print(f"     Robot-majority superior but trust varies")
     else:
-      print(f"   ⚠️ Results show instability and ranking changes")
+      print(f"     Results show instability and ranking changes")
     
     return scalability_summary
